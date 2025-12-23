@@ -127,11 +127,11 @@ $cart_totals = calculateCartTotals($cart_items);
                                             <td>
                                                 <div class="input-group input-group-sm" style="width: 100px;">
                                                     <!-- Decrease quantity button with variant data attributes -->
-                                                    <button type="button" class="btn btn-outline-secondary cart-qty-btn" data-action="qty-decrease" data-product-id="<?php echo $item['product_id']; ?>" data-color="<?php echo htmlspecialchars($item['selected_color'] ?? ''); ?>" data-size="<?php echo htmlspecialchars($item['selected_size'] ?? ''); ?>" onclick="return handleQtyChange(this, 'down')">−</button>
+                                                    <button type="button" class="btn btn-outline-secondary cart-qty-btn" data-action="qty-decrease" data-product-id="<?php echo $item['product_id']; ?>" data-color="<?php echo htmlspecialchars($item['selected_color'] ?? ''); ?>" data-size="<?php echo htmlspecialchars($item['selected_size'] ?? ''); ?>">−</button>
                                                     <!-- Read-only display of current quantity -->
                                                     <input type="text" class="form-control text-center" value="<?php echo intval($item['quantity']); ?>" readonly>
                                                     <!-- Increase quantity button with variant data attributes -->
-                                                    <button type="button" class="btn btn-outline-secondary cart-qty-btn" data-action="qty-increase" data-product-id="<?php echo $item['product_id']; ?>" data-color="<?php echo htmlspecialchars($item['selected_color'] ?? ''); ?>" data-size="<?php echo htmlspecialchars($item['selected_size'] ?? ''); ?>" onclick="return handleQtyChange(this, 'up')">+</button>
+                                                    <button type="button" class="btn btn-outline-secondary cart-qty-btn" data-action="qty-increase" data-product-id="<?php echo $item['product_id']; ?>" data-color="<?php echo htmlspecialchars($item['selected_color'] ?? ''); ?>" data-size="<?php echo htmlspecialchars($item['selected_size'] ?? ''); ?>">+</button>
                                                 </div>
                                             </td>
                                             <!-- LINE TOTAL COLUMN -->
