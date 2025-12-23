@@ -461,6 +461,129 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
     .sortable-menu-item {
         transition: all 0.2s ease;
     }
+    
+    /* Modal Styling */
+    .modal-content {
+        background: var(--primary-dark) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-header {
+        border-bottom: 2px solid var(--accent-gold) !important;
+        background: linear-gradient(135deg, var(--primary-dark) 0%, rgba(201, 169, 97, 0.05) 100%);
+        padding: 1.5rem;
+    }
+    
+    .modal-title {
+        color: var(--accent-gold);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .modal-header .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+    
+    .modal-header .btn-close:hover {
+        opacity: 1;
+    }
+    
+    .modal-body {
+        padding: 2rem;
+        color: var(--text-primary);
+    }
+    
+    .modal-body .form-label {
+        color: var(--accent-gold);
+        font-weight: 500;
+        margin-bottom: 0.7rem;
+    }
+    
+    .modal-body .form-control,
+    .modal-body .form-select {
+        background: var(--primary-light) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+        padding: 0.75rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-body .form-control:focus,
+    .modal-body .form-select:focus {
+        background: var(--primary-light) !important;
+        border-color: var(--accent-gold) !important;
+        box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+        color: var(--text-primary) !important;
+    }
+    
+    .modal-body .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: 0.3em;
+        border: 1px solid var(--border-color);
+        background: var(--primary-light);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-body .form-check-input:checked {
+        background-color: var(--accent-gold);
+        border-color: var(--accent-gold);
+    }
+    
+    .modal-body .form-check-input:focus {
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+    }
+    
+    .modal-body .form-check-label {
+        color: var(--text-primary);
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid var(--border-color) !important;
+        padding: 1.5rem;
+        background: rgba(201, 169, 97, 0.02);
+    }
+    
+    .modal-footer .btn-secondary {
+        background: var(--primary-light) !important;
+        border: 1px solid var(--border-color) !important;
+        color: var(--text-primary) !important;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-footer .btn-secondary:hover {
+        background: var(--primary-medium) !important;
+        border-color: var(--accent-gold) !important;
+    }
+    
+    .modal-footer .btn-primary {
+        background: var(--accent-gold) !important;
+        border: 1px solid var(--accent-gold) !important;
+        color: #000 !important;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-footer .btn-primary:hover {
+        background: #e0c087 !important;
+        border-color: #e0c087 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(201, 169, 97, 0.3);
+    }
+    
+    /* Modal backdrop */
+    .modal-backdrop {
+        background: rgba(0, 0, 0, 0.6) !important;
+    }
 </style>
 </body>
 </html>
