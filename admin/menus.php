@@ -51,12 +51,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'add') {
             $label = $_POST['label'] ?? '';
             $url = $_POST['url'] ?? '';
-            $position = (int)($_POST['position'] ?? 0);
             $parent_id = $_POST['parent_id'] && $_POST['parent_id'] !== 'none' ? (int)$_POST['parent_id'] : null;
             
             if (empty($label) || empty($url)) {
                 $error = 'Label and URL are required!';
             } else {
+                // Get the next position for this item
+                $position_query = "SELECT MAX(position) as max_pos FROM menu_items";
+                $pos_result = $conn->query($position_query);
+                $pos_row = $pos_result->fetch_assoc();
+                $position = ($pos_row['max_pos'] ?? -1) + 1;
                 createMenuItem($label, $url, $position, $parent_id);
                 $message = 'Menu item added successfully!';
                 // Log the update
@@ -66,12 +70,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)$_POST['id'];
             $label = $_POST['label'] ?? '';
             $url = $_POST['url'] ?? '';
-            $position = (int)($_POST['position'] ?? 0);
             $active = isset($_POST['active']);
             
             if (empty($label) || empty($url)) {
                 $error = 'Label and URL are required!';
             } else {
+                // Get current position from database
+                $curr_query = "SELECT position FROM menu_items WHERE id = ?";
+                $curr_stmt = $conn->prepare($curr_query);
+                $curr_stmt->bind_param('i', $id);
+                $curr_stmt->execute();
+                $curr_result = $curr_stmt->get_result();
+                $curr_row = $curr_result->fetch_assoc();
+                $position = $curr_row['position'] ?? 0;
+                $curr_stmt->close();
                 updateMenuItem($id, $label, $url, $position, $active);
                 $message = 'Menu item updated successfully!';
                 // Log the update
@@ -172,11 +184,6 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                         </div>
                         
                         <div class="col-md-2">
-                            <label for="position" class="form-label">Position</label>
-                            <input type="number" class="form-control" id="position" name="position" value="0">
-                        </div>
-                        
-                        <div class="col-md-2">
                             <label for="parent_id" class="form-label">Parent Menu</label>
                             <select class="form-select" id="parent_id" name="parent_id">
                                 <option value="none">None (Top Level)</option>
@@ -234,7 +241,7 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                             <button class="btn btn-sm <?php echo $item['active'] ? 'btn-warning' : 'btn-success'; ?>" onclick="toggleMenuItemVisibility(<?php echo $item['id']; ?>, <?php echo $item['active']; ?>)" title="<?php echo $item['active'] ? 'Hide menu item' : 'Show menu item'; ?>">
                                                 <i class="fas <?php echo $item['active'] ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-warning edit-menu-btn" data-menu-id="<?php echo $item['id']; ?>" data-label="<?php echo htmlspecialchars($item['label']); ?>" data-url="<?php echo htmlspecialchars($item['url']); ?>" data-position="<?php echo $item['position']; ?>" data-active="<?php echo $item['active']; ?>">
+                                            <button class="btn btn-sm btn-warning edit-menu-btn" data-menu-id="<?php echo $item['id']; ?>" data-label="<?php echo htmlspecialchars($item['label']); ?>" data-url="<?php echo htmlspecialchars($item['url']); ?>" data-active="<?php echo $item['active']; ?>">
                                                 <i class="fas fa-edit"></i> Edit
                                             </button>
                                             <form method="POST" style="display: inline;">
@@ -277,12 +284,6 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                     <label for="edit_menu_url" class="form-label">URL</label>
                                     <input type="text" class="form-control" id="edit_menu_url" 
                                            name="url" required>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="edit_menu_position" class="form-label">Position</label>
-                                    <input type="number" class="form-control" id="edit_menu_position" 
-                                           name="position">
                                 </div>
                                 
                                 <div class="mb-3 form-check">
@@ -330,14 +331,12 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
             const menuId = this.getAttribute('data-menu-id');
             const label = this.getAttribute('data-label');
             const url = this.getAttribute('data-url');
-            const position = this.getAttribute('data-position');
             const active = this.getAttribute('data-active');
             
             // Populate modal with data
             document.getElementById('edit_menu_id').value = menuId;
             document.getElementById('edit_menu_label').value = label;
             document.getElementById('edit_menu_url').value = url;
-            document.getElementById('edit_menu_position').value = position;
             document.getElementById('edit_menu_active').checked = active == 1;
             
             // Show modal
