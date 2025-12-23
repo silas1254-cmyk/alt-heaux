@@ -166,10 +166,10 @@
                     <?php 
                             endforeach;
                         else:
-                            // No menu items: show default pages + custom published pages
+                            // No menu items: show default pages
                             $reserved_slugs = ['shop', 'cart', 'page', 'product', 'dashboard', 'orders', 'profile', 'downloads'];
                     ?>
-                        <!-- Always show core pages -->
+                        <!-- Always show core pages when no menu items exist -->
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo SITE_URL; ?>index.php">Home</a>
                         </li>
@@ -179,6 +179,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo SITE_URL; ?>pages/contact.php">Contact</a>
                         </li>
+                    <?php endif; ?>
+                    
+                    <!-- Cart and Auth: Always show these regardless of menu items -->
                     <li class="nav-item cart-dropdown-wrapper">
                         <a class="nav-link cart-link" href="<?php echo SITE_URL; ?>pages/cart.php">
                             <i class="fas fa-shopping-cart"></i> Cart
@@ -318,12 +321,23 @@
         document.addEventListener('click', function(e) {
             console.log('Click event detected:', e.target);
             
-            // Handle remove item buttons in dropdown - redirect to cart page instead
+            // Handle remove item buttons in dropdown - call main.js removeFromCart
             if (e.target.closest('button[data-action="remove-item"]')) {
-                console.log('Remove button clicked in dropdown - redirecting to cart');
+                const btn = e.target.closest('button[data-action="remove-item"]');
+                const productId = btn.dataset.productId;
+                const color = btn.dataset.color || '';
+                const size = btn.dataset.size || '';
+                
+                console.log('Remove button clicked in dropdown - removing item:', productId, color, size);
                 e.preventDefault();
-                window.location.href = '<?php echo SITE_URL; ?>pages/cart.php';
+                e.stopPropagation();
+                
+                // Call main.js removeFromCart function which handles the API call and page reload
+                if (typeof removeFromCart === 'function') {
+                    removeFromCart(productId, color, size);
+                }
                 return;
             }
         });
+
     </script>

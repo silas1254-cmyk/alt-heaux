@@ -105,6 +105,10 @@ function removeFromCart(productId, color = '', size = '') {
     console.log('removeFromCart called with productId:', productId, 'color:', color, 'size:', size);
     console.log('Sending request to:', CART_API_URL);
     
+    if (!confirm('Remove this item from your cart?')) {
+        return;
+    }
+    
     const formData = new FormData();
     formData.append('action', 'remove');
     formData.append('product_id', productId);
@@ -126,10 +130,8 @@ function removeFromCart(productId, color = '', size = '') {
             showToast('success', 'Item removed from cart');
             updateCartBadge();
             
-            // Refresh cart page if open - check for both 'pages' and 'cart' in URL
-            const isOnCartPage = window.location.href.includes('section=cart');
-            console.log('Is on cart page:', isOnCartPage, 'URL:', window.location.href);
-            if (isOnCartPage) {
+            // Reload cart page if on cart.php
+            if (window.location.href.includes('pages/cart.php')) {
                 console.log('Reloading cart page...');
                 setTimeout(() => location.reload(), 500);
             }
@@ -177,6 +179,40 @@ function updateQuantity(productId, quantity) {
     })
     .catch(error => {
         console.error('Error:', error);
+    });
+}
+
+/**
+ * Update cart quantity by direction (increase/decrease)
+ * Used for +/- buttons on cart page
+ */
+function updateQuantityByDirection(productId, direction, color = '', size = '') {
+    fetch(CART_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'update_quantity',
+            product_id: productId,
+            direction: direction,
+            color: color,
+            size: size
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateCartBadge();
+            // Refresh page to show updated totals
+            location.reload();
+        } else {
+            showToast('danger', 'Error updating quantity: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('danger', 'Error updating quantity');
     });
 }
 

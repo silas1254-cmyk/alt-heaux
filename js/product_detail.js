@@ -233,23 +233,23 @@ function addToCartFromModal() {
     const size = selectedSize;
 
     if (!productId || quantity < 1) {
-        alert('Please enter a valid quantity');
+        showToast('danger', 'Please enter a valid quantity');
         return;
     }
 
     // Check if color is required but not selected
     if (document.getElementById('colorSection').style.display !== 'none' && !color) {
-        alert('Please select a color');
+        showToast('danger', 'Please select a color');
         return;
     }
 
     // Check if size is required but not selected
     if (document.getElementById('sizeSection').style.display !== 'none' && !size) {
-        alert('Please select a size');
+        showToast('danger', 'Please select a size');
         return;
     }
 
-    // Add to cart
+    // Add to cart via main.js function
     const formData = new FormData();
     formData.append('action', 'add');
     formData.append('product_id', productId);
@@ -271,7 +271,7 @@ function addToCartFromModal() {
             // Update cart badge
             updateCartBadge();
 
-            // Show success message
+            // Show success message - using main.js showToast
             showToast('success', 'Product added to cart!');
         } else {
             showToast('danger', data.message || 'Error adding to cart');
