@@ -179,23 +179,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo SITE_URL; ?>pages/contact.php">Contact</a>
                         </li>
-                        
-                        <!-- Show custom published pages (non-reserved slugs) -->
-                        <?php 
-                            $published_pages = getPublishedPages($conn);
-                            if (!empty($published_pages)):
-                                foreach ($published_pages as $page):
-                                    if (!in_array($page['slug'], $reserved_slugs)):
-                        ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?php echo SITE_URL; ?>pages/page.php?page=<?php echo htmlspecialchars($page['slug']); ?>"><?php echo htmlspecialchars($page['title']); ?></a>
-                        </li>
-                        <?php 
-                                    endif;
-                                endforeach;
-                            endif;
-                        endif; 
-                    ?>
                     <li class="nav-item cart-dropdown-wrapper">
                         <a class="nav-link cart-link" href="<?php echo SITE_URL; ?>pages/cart.php">
                             <i class="fas fa-shopping-cart"></i> Cart
