@@ -9,18 +9,35 @@ $categories = getAllCategories($conn);
 
 // Handle category actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+    // Check if this is a JSON request (from AJAX drag-drop)
+    $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($content_type, 'application/json') !== false) {
+        $json = json_decode(file_get_contents('php://input'), true);
+        $action = $json['action'] ?? '';
+        $_POST = $json; // Merge JSON into $_POST for consistency
+    } else {
+        $action = $_POST['action'] ?? '';
+    }
     
     if ($action === 'reorder') {
         // Handle AJAX reorder request
         $order = $_POST['order'] ?? [];
         if (!empty($order)) {
-            foreach ($order as $position => $category_id) {
-                updateCategoryOrder($category_id, $position, $conn);
+            foreach ($order as $item) {
+                $category_id = intval($item['id'] ?? 0);
+                $position = intval($item['position'] ?? 0);
+                if ($category_id > 0) {
+                    updateCategoryOrder($category_id, $position, $conn);
+                }
             }
             // Log the update
             logWebsiteUpdate('Category', "Reordered categories", "Updated category display order", 'Update', $conn);
+            header('Content-Type: application/json');
             echo json_encode(['success' => true]);
+            exit;
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'No order data provided']);
             exit;
         }
     } elseif ($action === 'create') {
@@ -246,12 +263,15 @@ if (isset($_GET['edit'])) {
         // Save the new order to the server
         function saveNewOrder() {
             const items = document.querySelectorAll('.sortable-item');
-            const order = {};
+            const order = [];
             let position = 0;
             
             items.forEach(item => {
                 const categoryId = item.getAttribute('data-category-id');
-                order[position] = categoryId;
+                order.push({
+                    id: categoryId,
+                    position: position
+                });
                 position++;
             });
             
@@ -259,9 +279,12 @@ if (isset($_GET['edit'])) {
             fetch('<?php echo SITE_URL; ?>admin/categories.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: 'action=reorder&' + new URLSearchParams(order).toString()
+                body: JSON.stringify({
+                    action: 'reorder',
+                    order: order
+                })
             })
             .then(response => response.json())
             .then(data => {
@@ -273,11 +296,20 @@ if (isset($_GET['edit'])) {
                         <strong>Order saved!</strong> Category order has been updated.
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     `;
-                    document.querySelector('.container-fluid .row').insertBefore(alert, document.querySelector('.main-content').firstChild);
+                    document.querySelector('.main-content').insertBefore(alert, document.querySelector('.card:first-child'));
                     setTimeout(() => alert.remove(), 3000);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show';
+                alert.innerHTML = `
+                    <strong>Error!</strong> Failed to save order. Please try again.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.main-content').insertBefore(alert, document.querySelector('.card:first-child'));
+            });
         }
         
         // Handle delete buttons with modal confirmation
