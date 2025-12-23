@@ -13,8 +13,42 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
+    // Check if this is a JSON request (from AJAX drag-drop)
+    $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($content_type, 'application/json') !== false) {
+        $json = json_decode(file_get_contents('php://input'), true);
+        $action = $json['action'] ?? '';
+        $_POST = $json; // Merge JSON into $_POST for consistency
+    }
+    
     try {
-        if ($action === 'add') {
+        if ($action === 'reorder') {
+            // Handle AJAX reorder request
+            $items = $_POST['items'] ?? [];
+            if (!empty($items)) {
+                foreach ($items as $item) {
+                    $menu_id = intval($item['id'] ?? 0);
+                    $position = intval($item['position'] ?? 0);
+                    $parent_id = isset($item['parent_id']) && $item['parent_id'] !== 'null' ? intval($item['parent_id']) : null;
+                    if ($menu_id > 0) {
+                        $update_query = "UPDATE menu_items SET position = ?, parent_id = ? WHERE id = ?";
+                        $update_stmt = $conn->prepare($update_query);
+                        $update_stmt->bind_param('iii', $position, $parent_id, $menu_id);
+                        $update_stmt->execute();
+                        $update_stmt->close();
+                    }
+                }
+                // Log the update
+                logWebsiteUpdate('Menu', "Reordered menu items", "Updated menu item order and hierarchy", 'Update', $conn);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true]);
+                exit;
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'No order data provided']);
+                exit;
+            }
+        } elseif ($action === 'add') {
             $label = $_POST['label'] ?? '';
             $url = $_POST['url'] ?? '';
             $position = (int)($_POST['position'] ?? 0);
@@ -138,95 +172,103 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-list"></i> Current Menu Items
+                    <span class="text-muted" style="font-size: 0.9em; margin-left: 10px;"><i class="fas fa-arrows-alt-v"></i> Drag to reorder items and organize hierarchy</span>
                 </div>
                 <div class="card-body">
                     <?php if (empty($menu_items)): ?>
                         <p class="text-muted"><i class="fas fa-info-circle"></i> No menu items yet. Add one above!</p>
                     <?php else: ?>
-                        <?php foreach ($menu_items as $item): 
-                            $item_class = $item['parent_id'] ? 'submenu' : '';
-                        ?>
-                            <div class="menu-item-row <?php echo $item_class; ?>">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <div class="menu-item-label">
-                                            <?php if ($item['parent_id']): ?>
-                                                <i class="fas fa-arrow-right text-muted"></i>
-                                            <?php endif; ?>
-                                            <?php echo htmlspecialchars($item['label']); ?>
+                        <div id="sortable-menu" class="menu-tree">
+                            <?php foreach ($menu_items as $item): 
+                                $item_class = $item['parent_id'] ? 'menu-item-submenu' : 'menu-item-root';
+                            ?>
+                                <div class="menu-item-row sortable-menu-item <?php echo $item_class; ?>" data-menu-id="<?php echo $item['id']; ?>" data-parent-id="<?php echo $item['parent_id'] ?? 'null'; ?>" style="cursor: grab; background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 15px; border-radius: 6px; margin-left: <?php echo $item['parent_id'] ? '30px' : '0'; ?>;">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <i class="fas fa-grip-vertical" style="color: var(--text-muted); cursor: grab;"></i>
+                                                <div>
+                                                    <div class="menu-item-label">
+                                                        <?php if ($item['parent_id']): ?>
+                                                            <i class="fas fa-arrow-right text-muted"></i>
+                                                        <?php endif; ?>
+                                                        <?php echo htmlspecialchars($item['label']); ?>
+                                                    </div>
+                                                    <div class="menu-item-url"><?php echo htmlspecialchars($item['url']); ?></div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="menu-item-url"><?php echo htmlspecialchars($item['url']); ?></div>
-                                    </div>
-                                    <div class="col-md-2 text-center">
-                                        <span class="badge bg-<?php echo $item['active'] ? 'success' : 'secondary'; ?>">
-                                            <?php echo $item['active'] ? 'Active' : 'Inactive'; ?>
-                                        </span>
-                                    </div>
-                                    <div class="col-md-4 text-end">
-                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" 
-                                                data-bs-target="#editModal<?php echo $item['id']; ?>">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <form method="POST" style="display: inline;">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger" 
-                                                    onclick="return confirm('Delete this menu item?');">
-                                                <i class="fas fa-trash"></i> Delete
+                                        <div class="col-md-2 text-center">
+                                            <span class="badge bg-<?php echo $item['active'] ? 'success' : 'secondary'; ?>">
+                                                <?php echo $item['active'] ? 'Active' : 'Inactive'; ?>
+                                            </span>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" 
+                                                    data-bs-target="#editModal<?php echo $item['id']; ?>">
+                                                <i class="fas fa-edit"></i> Edit
                                             </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Edit Modal -->
-                            <div class="modal fade" id="editModal<?php echo $item['id']; ?>" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Menu Item</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form method="POST">
-                                            <div class="modal-body">
-                                                <input type="hidden" name="action" value="edit">
+                                            <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                                
-                                                <div class="mb-3">
-                                                    <label for="edit_label<?php echo $item['id']; ?>" class="form-label">Label</label>
-                                                    <input type="text" class="form-control" id="edit_label<?php echo $item['id']; ?>" 
-                                                           name="label" value="<?php echo htmlspecialchars($item['label']); ?>" required>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="edit_url<?php echo $item['id']; ?>" class="form-label">URL</label>
-                                                    <input type="text" class="form-control" id="edit_url<?php echo $item['id']; ?>" 
-                                                           name="url" value="<?php echo htmlspecialchars($item['url']); ?>" required>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="edit_position<?php echo $item['id']; ?>" class="form-label">Position</label>
-                                                    <input type="number" class="form-control" id="edit_position<?php echo $item['id']; ?>" 
-                                                           name="position" value="<?php echo $item['position']; ?>">
-                                                </div>
-                                                
-                                                <div class="mb-3 form-check">
-                                                    <input type="checkbox" class="form-check-input" id="edit_active<?php echo $item['id']; ?>" 
-                                                           name="active" <?php echo $item['active'] ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="edit_active<?php echo $item['id']; ?>">
-                                                        Active
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                            </div>
-                                        </form>
+                                                <button type="submit" class="btn btn-sm btn-danger" 
+                                                        onclick="return confirm('Delete this menu item?');">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <?php endforeach; ?>
+                                
+                                <!-- Edit Modal -->
+                                <div class="modal fade" id="editModal<?php echo $item['id']; ?>" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Edit Menu Item</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="POST">
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="action" value="edit">
+                                                    <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="edit_label<?php echo $item['id']; ?>" class="form-label">Label</label>
+                                                        <input type="text" class="form-control" id="edit_label<?php echo $item['id']; ?>" 
+                                                               name="label" value="<?php echo htmlspecialchars($item['label']); ?>" required>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="edit_url<?php echo $item['id']; ?>" class="form-label">URL</label>
+                                                        <input type="text" class="form-control" id="edit_url<?php echo $item['id']; ?>" 
+                                                               name="url" value="<?php echo htmlspecialchars($item['url']); ?>" required>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="edit_position<?php echo $item['id']; ?>" class="form-label">Position</label>
+                                                        <input type="number" class="form-control" id="edit_position<?php echo $item['id']; ?>" 
+                                                               name="position" value="<?php echo $item['position']; ?>">
+                                                    </div>
+                                                    
+                                                    <div class="mb-3 form-check">
+                                                        <input type="checkbox" class="form-check-input" id="edit_active<?php echo $item['id']; ?>" 
+                                                               name="active" <?php echo $item['active'] ? 'checked' : ''; ?>>
+                                                        <label class="form-check-label" for="edit_active<?php echo $item['id']; ?>">
+                                                            Active
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -235,6 +277,87 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="<?php echo SITE_URL; ?>js/admin.js"></script>
+<script>
+    // Initialize drag-and-drop sorting for menu items
+    const sortableMenu = document.getElementById('sortable-menu');
+    
+    if (sortableMenu) {
+        const sortable = Sortable.create(sortableMenu, {
+            animation: 150,
+            handle: '.fa-grip-vertical',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag',
+            onEnd: function(evt) {
+                saveMenuOrder();
+            }
+        });
+    }
+    
+    // Save the new menu order to the server
+    function saveMenuOrder() {
+        const items = document.querySelectorAll('.sortable-menu-item');
+        const order = [];
+        let position = 0;
+        
+        items.forEach(item => {
+            const menuId = item.getAttribute('data-menu-id');
+            const parentId = item.getAttribute('data-parent-id');
+            order.push({
+                id: menuId,
+                position: position,
+                parent_id: parentId === 'null' ? null : parseInt(parentId)
+            });
+            position++;
+        });
+        
+        // Send AJAX request to save order
+        fetch('<?php echo SITE_URL; ?>admin/menus.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'reorder',
+                items: order
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show';
+                alert.innerHTML = `
+                    <strong>Order saved!</strong> Menu item order has been updated.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.page-header').parentElement.insertBefore(alert, document.querySelector('.page-header').nextSibling);
+                setTimeout(() => alert.remove(), 3000);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+<style>
+    .menu-tree {
+        padding: 10px;
+    }
+    
+    .sortable-ghost {
+        opacity: 0.5;
+        background-color: var(--accent-gold);
+    }
+    
+    .sortable-drag {
+        opacity: 1;
+        box-shadow: 0 4px 12px rgba(201, 169, 97, 0.3);
+    }
+    
+    .sortable-menu-item {
+        transition: all 0.2s ease;
+    }
+</style>
 </body>
 </html>
