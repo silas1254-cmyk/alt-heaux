@@ -901,11 +901,11 @@ if (isset($_GET['edit'])) {
                             <label for="new_category" class="form-label">Category</label>
                             <select class="form-control" id="new_category" name="category">
                                 <option value="">Select Category</option>
-                                <option value="T-Shirts">T-Shirts</option>
-                                <option value="Hoodies">Hoodies</option>
-                                <option value="Pants">Pants</option>
-                                <option value="Jackets">Jackets</option>
-                                <option value="Accessories">Accessories</option>
+                                <?php foreach ($all_categories as $cat): ?>
+                                    <option value="<?php echo htmlspecialchars($cat['name']); ?>">
+                                        <?php echo htmlspecialchars($cat['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
