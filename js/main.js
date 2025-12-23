@@ -418,39 +418,67 @@ function initializeSmoothScroll() {
  */
 function initializeCartEventListeners() {
     console.log('Initializing cart event listeners...');
+    console.log('CART_API_URL:', typeof CART_API_URL !== 'undefined' ? CART_API_URL : 'UNDEFINED');
+    console.log('updateQuantityByDirection function:', typeof updateQuantityByDirection);
     
+    // Debug: Find all cart action buttons
+    const qtyIncreaseButtons = document.querySelectorAll('[data-action="qty-increase"]');
+    const qtyDecreaseButtons = document.querySelectorAll('[data-action="qty-decrease"]');
+    console.log('Found ' + qtyIncreaseButtons.length + ' qty-increase buttons');
+    console.log('Found ' + qtyDecreaseButtons.length + ' qty-decrease buttons');
+    qtyIncreaseButtons.forEach((btn, idx) => {
+        console.log('qty-increase button ' + idx + ':', btn.dataset);
+    });
+    qtyDecreaseButtons.forEach((btn, idx) => {
+        console.log('qty-decrease button ' + idx + ':', btn.dataset);
+    });
+    
+    // Set up event delegation for cart quantity buttons
     document.addEventListener('click', function(e) {
+        console.log('Document click event:', e.target, e.target.tagName, e.target.className);
+        
         // Handle quantity increase button
-        if (e.target.closest('[data-action="qty-increase"]')) {
-            const btn = e.target.closest('[data-action="qty-increase"]');
-            const productId = btn.dataset.productId;
-            const color = btn.dataset.color || '';
-            const size = btn.dataset.size || '';
-            console.log('Qty increase clicked:', {productId, color, size});
+        let qtyIncreaseBtn = e.target.closest('[data-action="qty-increase"]');
+        if (qtyIncreaseBtn) {
+            console.log('Matched qty-increase button');
+            e.preventDefault();
+            e.stopPropagation();
+            const productId = qtyIncreaseBtn.dataset.productId;
+            const color = qtyIncreaseBtn.dataset.color || '';
+            const size = qtyIncreaseBtn.dataset.size || '';
+            console.log('Qty increase clicked:', {productId, color, size, button: qtyIncreaseBtn});
             
-            updateQuantityByDirection(productId, 'up', color, size);
+            if (typeof updateQuantityByDirection === 'function') {
+                updateQuantityByDirection(productId, 'up', color, size);
+            } else {
+                console.error('updateQuantityByDirection is not a function!');
+            }
+            return false;
         }
         
         // Handle quantity decrease button
-        if (e.target.closest('[data-action="qty-decrease"]')) {
-            const btn = e.target.closest('[data-action="qty-decrease"]');
-            const productId = btn.dataset.productId;
-            const color = btn.dataset.color || '';
-            const size = btn.dataset.size || '';
-            console.log('Qty decrease clicked:', {productId, color, size});
+        let qtyDecreaseBtn = e.target.closest('[data-action="qty-decrease"]');
+        if (qtyDecreaseBtn) {
+            console.log('Matched qty-decrease button');
+            e.preventDefault();
+            e.stopPropagation();
+            const productId = qtyDecreaseBtn.dataset.productId;
+            const color = qtyDecreaseBtn.dataset.color || '';
+            const size = qtyDecreaseBtn.dataset.size || '';
+            console.log('Qty decrease clicked:', {productId, color, size, button: qtyDecreaseBtn});
             
-            updateQuantityByDirection(productId, 'down', color, size);
+            if (typeof updateQuantityByDirection === 'function') {
+                updateQuantityByDirection(productId, 'down', color, size);
+            } else {
+                console.error('updateQuantityByDirection is not a function!');
+            }
+            return false;
         }
     });
 }
 
 // Auto-initialize cart listeners when main.js loads
-console.log('main.js loaded, initializing cart listeners');
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeCartEventListeners);
-} else {
-    // DOM already loaded
-    initializeCartEventListeners();
-}
+console.log('main.js loaded, readyState:', document.readyState);
+initializeCartEventListeners();
 
 
