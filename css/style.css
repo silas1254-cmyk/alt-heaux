@@ -1,0 +1,517 @@
+/* ALT HEAUX - Premium Fashion Website Styles */
+
+:root {
+    --primary: #000000;
+    --secondary: #1a1a1a;
+    --accent: #c9a961;
+    --accent-dark: #997b4f;
+    --light: #fafafa;
+    --white: #ffffff;
+    --gray-light: #f5f5f5;
+    --gray-medium: #e0e0e0;
+    --gray-dark: #666666;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-heavy: 0 16px 48px rgba(0, 0, 0, 0.16);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--white);
+    color: #333333;
+    line-height: 1.6;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ====== NAVBAR ====== */
+.navbar {
+    background-color: var(--white) !important;
+    border-bottom: 1px solid var(--gray-medium);
+    padding: 1rem 0;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--primary) !important;
+    text-transform: uppercase;
+}
+
+.navbar-brand img {
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    color: var(--gray-dark) !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: var(--accent);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent) !important;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* ====== HERO SECTION ====== */
+.hero-section {
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(201, 169, 97, 0.1) 0%, transparent 70%);
+    animation: moveGradient 8s ease-in-out infinite;
+}
+
+@keyframes moveGradient {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(50px, 50px); }
+}
+
+.hero-section h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-section .lead {
+    font-size: 1.2rem;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+}
+
+.carousel-item {
+    position: relative;
+    transition: all 0.6s ease-in-out;
+}
+
+.carousel-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.carousel-caption {
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 2rem !important;
+    bottom: 30px !important;
+}
+
+.carousel-control-prev, .carousel-control-next {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.carousel-control-prev:hover, .carousel-control-next:hover {
+    opacity: 1;
+}
+
+/* ====== CARDS ====== */
+.card {
+    border: none;
+    background-color: var(--white);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 8px;
+}
+
+.card {
+    box-shadow: var(--shadow-light);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-heavy);
+    transform: translateY(-8px);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.card-title {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    color: var(--gray-dark);
+    font-size: 0.95rem;
+}
+
+/* ====== BUTTONS ====== */
+.btn {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.btn-dark {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+.btn-dark:hover {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-outline-dark {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-dark:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+.btn-accent {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--white);
+}
+
+.btn-accent:hover {
+    background-color: var(--accent-dark);
+    border-color: var(--accent-dark);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-light {
+    background-color: var(--light);
+    border-color: var(--light);
+    color: var(--primary);
+}
+
+.btn-light:hover {
+    background-color: var(--white);
+    border-color: var(--gray-medium);
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+}
+
+/* ====== PRODUCT GRID ====== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2.5rem;
+}
+
+.product-card {
+    position: relative;
+}
+
+.product-image {
+    position: relative;
+    overflow: hidden;
+    height: 350px;
+    background-color: var(--gray-light);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.08);
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 8px;
+}
+
+.product-card:hover .product-overlay {
+    opacity: 1;
+}
+
+.product-name {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.product-description {
+    color: var(--gray-dark);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* ====== FORMS ====== */
+.form-control, .form-select {
+    border: 1px solid var(--gray-medium);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
+    color: var(--primary);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+/* ====== SECTIONS ====== */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.section-subtitle {
+    color: var(--gray-dark);
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 1.1rem;
+}
+
+.section-padding {
+    padding: 5rem 0;
+}
+
+.section-divider {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    margin: 1.5rem auto;
+}
+
+/* ====== FOOTER ====== */
+footer {
+    background-color: var(--primary);
+    color: var(--white);
+    margin-top: 5rem;
+}
+
+footer h5 {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+}
+
+footer a {
+    color: #b0b0b0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+footer a:hover {
+    color: var(--accent);
+}
+
+footer .social-icons a {
+    font-size: 1.2rem;
+    margin-right: 1rem;
+}
+
+footer p {
+    color: #999999;
+    margin: 0;
+}
+
+/* ====== ANIMATIONS ====== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.6s ease-in-out;
+}
+
+.product-card {
+    animation: fadeInUp 0.6s ease-in-out;
+}
+
+/* ====== UTILITIES ====== */
+.bg-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.bg-accent {
+    background-color: var(--accent);
+}
+
+.text-accent {
+    color: var(--accent) !important;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-muted {
+    color: var(--gray-dark) !important;
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--gray-medium);
+    margin: 2rem 0;
+}
+
+/* ====== BADGES ====== */
+.badge {
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.badge-accent {
+    background-color: var(--accent);
+    color: var(--white);
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-section .lead {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+}

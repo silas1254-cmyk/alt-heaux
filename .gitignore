@@ -1,0 +1,65 @@
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.tmp
+desktop.ini
+
+# Environment & Configuration
+.env
+.env.local
+.env.*.local
+config.local.php
+
+# Database
+database_backup.sql
+*.sql.bak
+backups/
+*.backup
+
+# Logs & Temporary Files
+*.log
+logs/
+temp/
+*.cache
+.cache/
+
+# PHP Packages
+vendor/
+composer.lock
+
+# Node.js (if used in future)
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Build/Compilation
+dist/
+build/
+*.min.js
+*.min.css
+
+# User-uploaded Content (safe to ignore, will vary per installation)
+files/*
+!files/.gitkeep
+images/*
+!images/.gitkeep
+
+# Database Migrations (these are tracked but backups aren't)
+*.sql.bak
+
+# IDE Workspace
+.vscode/settings.json
+.vscode/launch.json
+
+# Minified assets are generated, not needed in repo
+css/*.min.css
+js/*.min.js
