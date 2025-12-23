@@ -64,20 +64,6 @@ function createAdminTables($conn) {
         )
     ");
 
-    // Pages table
-    $conn->query("
-        CREATE TABLE IF NOT EXISTS pages (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            slug VARCHAR(100) UNIQUE,
-            title VARCHAR(255),
-            content LONGTEXT,
-            meta_description VARCHAR(160),
-            status ENUM('published', 'draft') DEFAULT 'published',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
-    ");
-
     // Sliders table
     $conn->query("
         CREATE TABLE IF NOT EXISTS sliders (
