@@ -83,6 +83,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Menu item deleted successfully!';
             // Log the update
             logWebsiteUpdate('Menu', "Deleted menu item", "Navigation menu item removed", 'Delete', $conn);
+        } elseif ($action === 'toggle_visibility') {
+            // Handle AJAX toggle visibility request
+            $menu_id = intval($_POST['menu_id'] ?? 0);
+            $is_active = isset($_POST['is_active']) ? intval($_POST['is_active']) : 0;
+            $new_active = $is_active ? 0 : 1;
+            
+            if ($menu_id > 0) {
+                $update_query = "UPDATE menu_items SET active = ? WHERE id = ?";
+                $update_stmt = $conn->prepare($update_query);
+                $update_stmt->bind_param('ii', $new_active, $menu_id);
+                if ($update_stmt->execute()) {
+                    // Log the update
+                    logWebsiteUpdate('Menu', "Toggled menu item visibility", "Menu item " . ($new_active ? 'shown' : 'hidden'), 'Update', $conn);
+                    $update_stmt->close();
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => true, 'new_active' => $new_active]);
+                    exit;
+                } else {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'error' => $conn->error]);
+                    exit;
+                }
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'error' => 'Invalid menu ID']);
+                exit;
+            }
         }
     } catch (Exception $e) {
         $error = 'Error: ' . $e->getMessage();
@@ -204,6 +231,9 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                             </span>
                                         </div>
                                         <div class="col-md-4 text-end">
+                                            <button class="btn btn-sm <?php echo $item['active'] ? 'btn-warning' : 'btn-success'; ?>" onclick="toggleMenuItemVisibility(<?php echo $item['id']; ?>, <?php echo $item['active']; ?>)" title="<?php echo $item['active'] ? 'Hide menu item' : 'Show menu item'; ?>">
+                                                <i class="fas <?php echo $item['active'] ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
+                                            </button>
                                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal" 
                                                     data-bs-target="#editModal<?php echo $item['id']; ?>">
                                                 <i class="fas fa-edit"></i> Edit
@@ -292,6 +322,58 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
             onEnd: function(evt) {
                 saveMenuOrder();
             }
+        });
+    }
+    
+    // Toggle menu item visibility
+    function toggleMenuItemVisibility(menuId, isActive) {
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        // Send AJAX request
+        fetch('menus.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'toggle_visibility',
+                menu_id: menuId,
+                is_active: isActive
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const newActive = data.new_active;
+                // Update button appearance
+                btn.innerHTML = newActive ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+                btn.className = newActive ? 'btn btn-sm btn-warning' : 'btn btn-sm btn-success';
+                btn.title = newActive ? 'Hide menu item' : 'Show menu item';
+                btn.disabled = false;
+                
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show';
+                alert.innerHTML = `
+                    <strong>Success!</strong> Menu item visibility updated.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.page-header').parentElement.insertBefore(alert, document.querySelector('.page-header').nextSibling);
+                setTimeout(() => alert.remove(), 3000);
+            } else {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            console.error('Error:', error);
+            alert('Error updating menu item visibility');
         });
     }
     
