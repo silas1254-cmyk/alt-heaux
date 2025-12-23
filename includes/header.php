@@ -334,7 +334,12 @@
                 
                 // Call main.js removeFromCart function which handles the API call and page reload
                 if (typeof removeFromCart === 'function') {
+                    console.log('removeFromCart function available, calling it');
                     removeFromCart(productId, color, size);
+                } else {
+                    console.error('ERROR: removeFromCart function not available yet');
+                    // Fallback: show error message
+                    alert('System is loading. Please try again in a moment.');
                 }
                 return;
             }

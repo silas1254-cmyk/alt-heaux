@@ -187,32 +187,53 @@ function updateQuantity(productId, quantity) {
  * Used for +/- buttons on cart page
  */
 function updateQuantityByDirection(productId, direction, color = '', size = '') {
+    console.log('updateQuantityByDirection called:', {productId, direction, color, size});
+    
+    // Ensure productId is a number
+    productId = parseInt(productId);
+    if (!productId || !direction) {
+        showToast('danger', 'Invalid parameters for quantity update');
+        return;
+    }
+    
+    const requestData = {
+        action: 'update_quantity',
+        product_id: productId,
+        direction: direction,
+        color: color || '',
+        size: size || ''
+    };
+    
+    console.log('Sending request:', requestData);
+    
     fetch(CART_API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            action: 'update_quantity',
-            product_id: productId,
-            direction: direction,
-            color: color,
-            size: size
-        })
+        body: JSON.stringify(requestData)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Update response:', data);
         if (data.success) {
+            console.log('Quantity updated successfully');
+            showToast('success', 'Quantity updated');
             updateCartBadge();
             // Refresh page to show updated totals
-            location.reload();
+            console.log('Reloading page...');
+            setTimeout(() => location.reload(), 300);
         } else {
-            showToast('danger', 'Error updating quantity: ' + data.message);
+            console.error('Update failed:', data.message);
+            showToast('danger', 'Error updating quantity: ' + (data.message || 'Unknown error'));
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showToast('danger', 'Error updating quantity');
+        console.error('Fetch error:', error);
+        showToast('danger', 'Network error updating quantity');
     });
 }
 
@@ -390,4 +411,46 @@ function initializeSmoothScroll() {
         });
     });
 }
+
+/**
+ * Initialize cart page event listeners
+ * Called when main.js loads to set up delegation for cart actions
+ */
+function initializeCartEventListeners() {
+    console.log('Initializing cart event listeners...');
+    
+    document.addEventListener('click', function(e) {
+        // Handle quantity increase button
+        if (e.target.closest('[data-action="qty-increase"]')) {
+            const btn = e.target.closest('[data-action="qty-increase"]');
+            const productId = btn.dataset.productId;
+            const color = btn.dataset.color || '';
+            const size = btn.dataset.size || '';
+            console.log('Qty increase clicked:', {productId, color, size});
+            
+            updateQuantityByDirection(productId, 'up', color, size);
+        }
+        
+        // Handle quantity decrease button
+        if (e.target.closest('[data-action="qty-decrease"]')) {
+            const btn = e.target.closest('[data-action="qty-decrease"]');
+            const productId = btn.dataset.productId;
+            const color = btn.dataset.color || '';
+            const size = btn.dataset.size || '';
+            console.log('Qty decrease clicked:', {productId, color, size});
+            
+            updateQuantityByDirection(productId, 'down', color, size);
+        }
+    });
+}
+
+// Auto-initialize cart listeners when main.js loads
+console.log('main.js loaded, initializing cart listeners');
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCartEventListeners);
+} else {
+    // DOM already loaded
+    initializeCartEventListeners();
+}
+
 

@@ -258,35 +258,7 @@ $cart_totals = calculateCartTotals($cart_items);
 
 
 <!-- CART FUNCTIONALITY SCRIPTS -->
-<script>
-/**
- * EVENT DELEGATION FOR CART ACTIONS
- * Listens for clicks on dynamically-generated cart buttons
- * Uses data attributes to pass product ID and variant information
- */
-document.addEventListener('click', function(e) {
-    // Handle quantity increase button
-    if (e.target.closest('[data-action="qty-increase"]')) {
-        const btn = e.target.closest('[data-action="qty-increase"]');
-        const productId = btn.dataset.productId;
-        const color = btn.dataset.color || '';
-        const size = btn.dataset.size || '';
-        // Call updateQuantityByDirection with direction 'up'
-        updateQuantityByDirection(productId, 'up', color, size);
-    }
-    
-    // Handle quantity decrease button
-    if (e.target.closest('[data-action="qty-decrease"]')) {
-        const btn = e.target.closest('[data-action="qty-decrease"]');
-        const productId = btn.dataset.productId;
-        const color = btn.dataset.color || '';
-        const size = btn.dataset.size || '';
-        // Call updateQuantityByDirection with direction 'down'
-        updateQuantityByDirection(productId, 'down', color, size);
-    }
-    
-    // Note: remove-item button is handled by main.js's removeFromCart function
-});
-</script>
+<!-- Note: Cart event listeners are now initialized in main.js's initializeCartEventListeners() function
+     This ensures they're set up after main.js loads, avoiding timing issues with function availability -->
 
 <?php require '../includes/footer.php'; ?>
