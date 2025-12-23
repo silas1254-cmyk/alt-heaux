@@ -327,6 +327,3 @@
             }
         });
     </script>
-</head>
-<body>
-    <!-- Navigation and page content rendered by specific pages -->
