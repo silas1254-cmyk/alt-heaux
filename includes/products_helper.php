@@ -15,7 +15,7 @@ define('PRODUCTS_HELPER_LOADED', true);
  * @return array Categories
  */
 function getAllCategories($conn) {
-    $query = "SELECT id, name, slug, description, image_url, status FROM categories ORDER BY name ASC";
+    $query = "SELECT id, name, slug, description, image_url, status, display_order FROM categories ORDER BY display_order ASC, name ASC";
     $stmt = $conn->prepare($query);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -28,7 +28,7 @@ function getAllCategories($conn) {
  * @return array Active categories
  */
 function getActiveCategories($conn) {
-    $query = "SELECT id, name, slug, description, image_url FROM categories WHERE status = 'active' ORDER BY name ASC";
+    $query = "SELECT id, name, slug, description, image_url, display_order FROM categories WHERE status = 'active' ORDER BY display_order ASC, name ASC";
     $stmt = $conn->prepare($query);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -75,9 +75,14 @@ function getCategoryBySlug($slug, $conn) {
  * @return bool
  */
 function createCategory($name, $slug, $description, $image_url, $conn) {
-    $query = "INSERT INTO categories (name, slug, description, image_url, status) VALUES (?, ?, ?, ?, 'active')";
+    // Get the next display order
+    $order_result = $conn->query("SELECT COALESCE(MAX(display_order), -1) + 1 as next_order FROM categories");
+    $order_row = $order_result->fetch_assoc();
+    $display_order = $order_row['next_order'];
+    
+    $query = "INSERT INTO categories (name, slug, description, image_url, status, display_order) VALUES (?, ?, ?, ?, 'active', ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param('ssss', $name, $slug, $description, $image_url);
+    $stmt->bind_param('ssssi', $name, $slug, $description, $image_url, $display_order);
     return $stmt->execute();
 }
 
@@ -108,6 +113,20 @@ function deleteCategory($id, $conn) {
     $query = "DELETE FROM categories WHERE id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('i', $id);
+    return $stmt->execute();
+}
+
+/**
+ * Update category display order
+ * @param int $id Category ID
+ * @param int $display_order Display order position
+ * @param mysqli $conn Database connection
+ * @return bool
+ */
+function updateCategoryOrder($id, $display_order, $conn) {
+    $query = "UPDATE categories SET display_order = ? WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param('ii', $display_order, $id);
     return $stmt->execute();
 }
 

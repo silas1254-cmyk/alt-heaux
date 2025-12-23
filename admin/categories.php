@@ -11,7 +11,19 @@ $categories = getAllCategories($conn);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
-    if ($action === 'create') {
+    if ($action === 'reorder') {
+        // Handle AJAX reorder request
+        $order = $_POST['order'] ?? [];
+        if (!empty($order)) {
+            foreach ($order as $position => $category_id) {
+                updateCategoryOrder($category_id, $position, $conn);
+            }
+            // Log the update
+            logWebsiteUpdate('Category', "Reordered categories", "Updated category display order", 'Update', $conn);
+            echo json_encode(['success' => true]);
+            exit;
+        }
+    } elseif ($action === 'create') {
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
         $description = trim($_POST['description'] ?? '');
@@ -170,50 +182,40 @@ if (isset($_GET['edit'])) {
                 <!-- Categories List -->
                 <div class="card">
                     <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">All Categories (<?php echo count($categories); ?>)</h5>
+                        <h5 class="mb-0"><i class="fas fa-arrows-alt"></i> All Categories (<?php echo count($categories); ?>) - Drag to reorder</h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($categories)): ?>
                             <p class="text-muted">No categories created yet.</p>
                         <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Slug</th>
-                                            <th>Status</th>
-                                            <th>Created</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($categories as $cat): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($cat['name']); ?></td>
-                                                <td><code><?php echo htmlspecialchars($cat['slug']); ?></code></td>
-                                                <td>
-                                                    <span class="badge bg-<?php echo $cat['status'] === 'active' ? 'success' : 'danger'; ?>">
-                                                        <?php echo ucfirst($cat['status']); ?>
-                                                    </span>
-                                                </td>
-                                                <td><?php echo isset($cat['created_at']) && !empty($cat['created_at']) ? date('M d, Y', strtotime($cat['created_at'])) : 'N/A'; ?></td>
-                                                <td>
-                                                    <a href="?edit=<?php echo $cat['id']; ?>" class="btn btn-sm btn-primary">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
-                                                    <form method="POST" style="display: inline;" class="delete-form">
-                                                        <input type="hidden" name="action" value="delete">
-                                                        <input type="hidden" name="category_id" value="<?php echo $cat['id']; ?>">
-                                                        <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-id="<?php echo $cat['id']; ?>">
-                                                            <i class="fas fa-trash"></i> Delete
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                            <div id="sortable-categories" class="list-group">
+                                <?php foreach ($categories as $cat): ?>
+                                    <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-category-id="<?php echo $cat['id']; ?>" style="cursor: grab; background: #f9f9f9; margin-bottom: 8px; padding: 15px; border-radius: 6px;">
+                                        <div class="d-flex align-items-center flex-grow-1">
+                                            <i class="fas fa-grip-vertical me-3 text-muted" style="cursor: grab;"></i>
+                                            <div>
+                                                <strong><?php echo htmlspecialchars($cat['name']); ?></strong>
+                                                <br>
+                                                <small class="text-muted"><code><?php echo htmlspecialchars($cat['slug']); ?></code></small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-<?php echo $cat['status'] === 'active' ? 'success' : 'danger'; ?>">
+                                                <?php echo ucfirst($cat['status']); ?>
+                                            </span>
+                                            <a href="?edit=<?php echo $cat['id']; ?>" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <form method="POST" style="display: inline;" class="delete-form">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="category_id" value="<?php echo $cat['id']; ?>">
+                                                <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-id="<?php echo $cat['id']; ?>">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -223,15 +225,68 @@ if (isset($_GET['edit'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="<?php echo SITE_URL; ?>js/admin.js"></script>
     <script>
+        // Initialize drag-and-drop sorting
+        const sortableContainer = document.getElementById('sortable-categories');
+        
+        if (sortableContainer) {
+            const sortable = Sortable.create(sortableContainer, {
+                animation: 150,
+                handle: '.fa-grip-vertical',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function(evt) {
+                    saveNewOrder();
+                }
+            });
+        }
+        
+        // Save the new order to the server
+        function saveNewOrder() {
+            const items = document.querySelectorAll('.sortable-item');
+            const order = {};
+            let position = 0;
+            
+            items.forEach(item => {
+                const categoryId = item.getAttribute('data-category-id');
+                order[position] = categoryId;
+                position++;
+            });
+            
+            // Send AJAX request to save order
+            fetch('<?php echo SITE_URL; ?>admin/categories.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=reorder&' + new URLSearchParams(order).toString()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Optional: Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show';
+                    alert.innerHTML = `
+                        <strong>Order saved!</strong> Category order has been updated.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container-fluid .row').insertBefore(alert, document.querySelector('.main-content').firstChild);
+                    setTimeout(() => alert.remove(), 3000);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
         // Handle delete buttons with modal confirmation
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('[data-action="delete"]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     const form = btn.closest('form');
-                    const categoryName = btn.closest('tr').querySelector('td:first-child').textContent;
+                    const categoryName = btn.closest('.list-group-item')?.querySelector('strong')?.textContent || 'this category';
                     
                     ModalManager.confirm(
                         `Are you sure you want to delete the category "<strong>${categoryName}</strong>"? This action cannot be undone.`,
@@ -243,6 +298,24 @@ if (isset($_GET['edit'])) {
                 });
             });
         });
+        
+        // Add CSS for drag feedback
+        const style = document.createElement('style');
+        style.textContent = `
+            .sortable-ghost {
+                opacity: 0.5;
+                background-color: #f0f0f0 !important;
+            }
+            .sortable-drag {
+                opacity: 1;
+                background-color: #e3f2fd !important;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            }
+            .sortable-item {
+                transition: all 0.2s ease;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
