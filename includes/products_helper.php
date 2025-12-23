@@ -133,37 +133,47 @@ function getProductsByCategory($category_id, $conn) {
  * @return array Filtered products
  */
 function getFilteredProducts($filters, $conn) {
-    $query = "SELECT id, name, description, price, image_url, quantity FROM products WHERE 1=1";
+    // Modified query to join with product_images table and get primary image
+    $query = "SELECT 
+                p.id, 
+                p.name, 
+                p.description, 
+                p.price, 
+                p.quantity,
+                COALESCE(pi.image_path, '') as image_url
+              FROM products p
+              LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
+              WHERE 1=1";
     $params = [];
     $types = '';
 
     if (!empty($filters['category_id'])) {
-        $query .= " AND category_id = ?";
+        $query .= " AND p.category_id = ?";
         $params[] = $filters['category_id'];
         $types .= 'i';
     }
 
     if (!empty($filters['min_price'])) {
-        $query .= " AND price >= ?";
+        $query .= " AND p.price >= ?";
         $params[] = $filters['min_price'];
         $types .= 'd';
     }
 
     if (!empty($filters['max_price'])) {
-        $query .= " AND price <= ?";
+        $query .= " AND p.price <= ?";
         $params[] = $filters['max_price'];
         $types .= 'd';
     }
 
     if (!empty($filters['search'])) {
         $search = '%' . $filters['search'] . '%';
-        $query .= " AND (name LIKE ? OR description LIKE ?)";
+        $query .= " AND (p.name LIKE ? OR p.description LIKE ?)";
         $params[] = $search;
         $params[] = $search;
         $types .= 'ss';
     }
 
-    $query .= " ORDER BY name ASC";
+    $query .= " ORDER BY p.name ASC";
 
     $stmt = $conn->prepare($query);
     
@@ -173,7 +183,16 @@ function getFilteredProducts($filters, $conn) {
 
     $stmt->execute();
     $result = $stmt->get_result();
-    return $result->fetch_all(MYSQLI_ASSOC);
+    $products = $result->fetch_all(MYSQLI_ASSOC);
+    
+    // Add SITE_URL to image paths for proper display
+    foreach ($products as &$product) {
+        if (!empty($product['image_url'])) {
+            $product['image_url'] = SITE_URL . $product['image_url'];
+        }
+    }
+    
+    return $products;
 }
 
 /**

@@ -72,6 +72,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error = 'Error deleting product: ' . $conn->error;
         }
+    } elseif ($action === 'upload_showcase_image') {
+        $product_id = intval($_POST['product_id'] ?? 0);
+        
+        if ($product_id > 0 && !empty($_FILES['showcase_image']['name'])) {
+            // Handle single image upload
+            $file = $_FILES['showcase_image'];
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            
+            // Validate file type
+            if (!in_array($file['type'], $allowed_types)) {
+                $error = 'Invalid file type. Allowed: JPEG, PNG, GIF, WebP';
+            } elseif ($file['size'] > 5 * 1024 * 1024) {
+                $error = 'File is too large. Maximum size: 5MB';
+            } else {
+                // Create upload directory if it doesn't exist
+                $upload_dir = SITE_ROOT . 'images/products/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                // Generate unique filename
+                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+                $filename = 'product_' . $product_id . '_' . time() . '.' . $ext;
+                $filepath = $upload_dir . $filename;
+                
+                // Move uploaded file
+                if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                    // Store relative path for database
+                    $db_path = 'images/products/' . $filename;
+                    
+                    // Remove any existing primary image for this product
+                    $delete_query = "DELETE FROM product_images WHERE product_id = ? AND is_primary = TRUE";
+                    $del_stmt = $conn->prepare($delete_query);
+                    $del_stmt->bind_param('i', $product_id);
+                    $del_stmt->execute();
+                    
+                    // Add new image as primary
+                    addProductImage($product_id, $db_path, $filename, 0, true, $conn);
+                    $success = 'Showcase image uploaded and set successfully!';
+                } else {
+                    $error = 'Failed to upload file. Check directory permissions.';
+                }
+            }
+        } else {
+            $error = 'Product ID required and an image must be selected.';
+        }
     } elseif ($action === 'upload_images') {
         $product_id = intval($_POST['product_id'] ?? 0);
         
@@ -386,6 +432,50 @@ if (isset($_GET['edit'])) {
                                             </button>
                                             <a href="products.php" class="btn btn-secondary">Back to Products</a>
                                         </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Product Showcase Image (Single Main Image) -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-image"></i> Product Showcase Image</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted small mb-3">This is the main product image displayed on the shop page</p>
+                                    
+                                    <?php 
+                                    $primary_image = null;
+                                    if (!empty($product_images)) {
+                                        foreach ($product_images as $img) {
+                                            if ($img['is_primary']) {
+                                                $primary_image = $img;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                    
+                                    <?php if ($primary_image): ?>
+                                        <div class="mb-3">
+                                            <div style="max-width: 300px; border: 2px solid var(--accent); border-radius: 8px; overflow: hidden;">
+                                                <img src="<?php echo SITE_URL . htmlspecialchars($primary_image['image_path']); ?>" alt="Primary image" style="width: 100%; height: auto; display: block;">
+                                            </div>
+                                            <small class="text-muted d-block mt-2">Current showcase image</small>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <form method="POST" enctype="multipart/form-data">
+                                        <input type="hidden" name="action" value="upload_showcase_image">
+                                        <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
+                                        
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="showcase_image" name="showcase_image" accept="image/*" required>
+                                            <button class="btn btn-success" type="submit">
+                                                <i class="fas fa-upload"></i> Set as Showcase
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Supports: JPEG, PNG, GIF, WebP. Max 5MB.</small>
                                     </form>
                                 </div>
                             </div>
