@@ -49,7 +49,6 @@ function getCategoryById($id, $conn) {
     $result = $stmt->get_result();
     return $result->num_rows === 1 ? $result->fetch_assoc() : null;
 }
-}
 
 /**
  * Get category by slug
