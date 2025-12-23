@@ -207,13 +207,13 @@ if (isset($_GET['edit'])) {
                         <?php else: ?>
                             <div id="sortable-categories" class="list-group">
                                 <?php foreach ($categories as $cat): ?>
-                                    <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-category-id="<?php echo $cat['id']; ?>" style="cursor: grab; background: #f9f9f9; margin-bottom: 8px; padding: 15px; border-radius: 6px;">
+                                    <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-category-id="<?php echo $cat['id']; ?>" style="cursor: grab; background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 15px; border-radius: 6px;">
                                         <div class="d-flex align-items-center flex-grow-1">
-                                            <i class="fas fa-grip-vertical me-3 text-muted" style="cursor: grab;"></i>
+                                            <i class="fas fa-grip-vertical me-3" style="cursor: grab; color: var(--text-secondary);"></i>
                                             <div>
-                                                <strong><?php echo htmlspecialchars($cat['name']); ?></strong>
+                                                <strong style="color: var(--text-primary);"><?php echo htmlspecialchars($cat['name']); ?></strong>
                                                 <br>
-                                                <small class="text-muted"><code><?php echo htmlspecialchars($cat['slug']); ?></code></small>
+                                                <small style="color: var(--text-muted);"><code style="color: var(--accent-gold);"><?php echo htmlspecialchars($cat['slug']); ?></code></small>
                                             </div>
                                         </div>
                                         <div class="d-flex align-items-center gap-2">
@@ -334,15 +334,28 @@ if (isset($_GET['edit'])) {
         // Add CSS for drag feedback
         const style = document.createElement('style');
         style.textContent = `
+            :root {
+                --primary-dark: #1a1a1a;
+                --primary-light: #3a3a3a;
+                --accent-blue: #4a90e2;
+                --text-secondary: #b0b0b0;
+                --border-color: #404040;
+            }
+            
             .sortable-ghost {
                 opacity: 0.5;
-                background-color: #f0f0f0 !important;
+                background-color: var(--primary-dark) !important;
+                border: 2px dashed var(--border-color) !important;
             }
+            
             .sortable-drag {
                 opacity: 1;
-                background-color: #e3f2fd !important;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                background-color: var(--primary-light) !important;
+                border-color: var(--accent-blue) !important;
+                border: 2px solid var(--accent-blue) !important;
+                box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
             }
+            
             .sortable-item {
                 transition: all 0.2s ease;
             }
