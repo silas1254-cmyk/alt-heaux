@@ -142,10 +142,10 @@ $products = getFilteredProducts($filters, $conn);
                                 <div class="card h-100 shadow-light border-0">
                                     <!-- PRODUCT IMAGE CONTAINER -->
                                     <!-- Gradient background with product image centered -->
-                                    <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 250px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                         <!-- Display primary product image if available -->
                                         <?php if (!empty($product['image_url'])): ?>
-                                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid p-3" style="max-height: 250px; object-fit: contain;">
+                                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                                         <?php else: ?>
                                             <!-- Placeholder shown when no image is available -->
                                             <div class="text-center text-muted">
