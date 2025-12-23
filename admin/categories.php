@@ -42,14 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($action === 'create') {
         $name = trim($_POST['name'] ?? '');
-        $slug = trim($_POST['slug'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $image_url = trim($_POST['image_url'] ?? '');
         
-        if (empty($name) || empty($slug)) {
-            $error = 'Name and slug are required.';
+        if (empty($name)) {
+            $error = 'Name is required.';
         } else {
-            if (createCategory($name, $slug, $description, $image_url, $conn)) {
+            if (createCategory($name, $description, $conn)) {
                 $message = 'Category created successfully!';
                 // Log the update
                 logWebsiteUpdate('Category', "Created category: $name", "New product category added", 'Create', $conn);
@@ -63,13 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = $_POST['category_id'] ?? '';
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $image_url = trim($_POST['image_url'] ?? '');
         $status = $_POST['status'] ?? 'active';
         
         if (empty($name)) {
             $error = 'Name is required.';
         } else {
-            if (updateCategory($id, $name, $description, $image_url, $status, $conn)) {
+            if (updateCategory($id, $name, $description, $status, $conn)) {
                 $message = 'Category updated successfully!';
                 // Log the update
                 logWebsiteUpdate('Category', "Updated category: $name", "Modified category details", 'Update', $conn);
@@ -146,30 +143,15 @@ if (isset($_GET['edit'])) {
                                 <input type="hidden" name="category_id" value="<?php echo $edit_category['id']; ?>">
                             <?php endif; ?>
 
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label">Category Name *</label>
-                                    <input type="text" class="form-control" id="name" name="name" 
-                                           value="<?php echo htmlspecialchars($edit_category['name'] ?? $_POST['name'] ?? ''); ?>" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="slug" class="form-label">URL Slug <?php echo $edit_category ? '(read-only)' : '*'; ?></label>
-                                    <input type="text" class="form-control" id="slug" name="slug" 
-                                           value="<?php echo htmlspecialchars($edit_category['slug'] ?? $_POST['slug'] ?? ''); ?>" 
-                                           <?php echo $edit_category ? 'readonly' : 'required'; ?>>
-                                </div>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Category Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="<?php echo htmlspecialchars($edit_category['name'] ?? $_POST['name'] ?? ''); ?>" required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="3"><?php echo htmlspecialchars($edit_category['description'] ?? $_POST['description'] ?? ''); ?></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="image_url" class="form-label">Image URL</label>
-                                <input type="text" class="form-control" id="image_url" name="image_url" 
-                                       value="<?php echo htmlspecialchars($edit_category['image_url'] ?? $_POST['image_url'] ?? ''); ?>" 
-                                       placeholder="https://example.com/image.jpg">
                             </div>
 
                             <?php if ($edit_category): ?>

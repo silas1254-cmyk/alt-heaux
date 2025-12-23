@@ -15,7 +15,7 @@ define('PRODUCTS_HELPER_LOADED', true);
  * @return array Categories
  */
 function getAllCategories($conn) {
-    $query = "SELECT id, name, slug, description, image_url, status, display_order FROM categories ORDER BY display_order ASC, name ASC";
+    $query = "SELECT id, name, description, status, display_order FROM categories ORDER BY display_order ASC, name ASC";
     $stmt = $conn->prepare($query);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -28,7 +28,7 @@ function getAllCategories($conn) {
  * @return array Active categories
  */
 function getActiveCategories($conn) {
-    $query = "SELECT id, name, slug, description, image_url, display_order FROM categories WHERE status = 'active' ORDER BY display_order ASC, name ASC";
+    $query = "SELECT id, name, description, display_order FROM categories WHERE status = 'active' ORDER BY display_order ASC, name ASC";
     $stmt = $conn->prepare($query);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -42,12 +42,13 @@ function getActiveCategories($conn) {
  * @return array|null Category data
  */
 function getCategoryById($id, $conn) {
-    $query = "SELECT id, name, slug, description, image_url, status FROM categories WHERE id = ?";
+    $query = "SELECT id, name, description, status, display_order FROM categories WHERE id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('i', $id);
     $stmt->execute();
     $result = $stmt->get_result();
     return $result->num_rows === 1 ? $result->fetch_assoc() : null;
+}
 }
 
 /**
@@ -68,21 +69,19 @@ function getCategoryBySlug($slug, $conn) {
 /**
  * Create category
  * @param string $name Category name
- * @param string $slug Category slug
  * @param string $description Category description
- * @param string $image_url Category image
  * @param mysqli $conn Database connection
  * @return bool
  */
-function createCategory($name, $slug, $description, $image_url, $conn) {
+function createCategory($name, $description, $conn) {
     // Get the next display order
     $order_result = $conn->query("SELECT COALESCE(MAX(display_order), -1) + 1 as next_order FROM categories");
     $order_row = $order_result->fetch_assoc();
     $display_order = $order_row['next_order'];
     
-    $query = "INSERT INTO categories (name, slug, description, image_url, status, display_order) VALUES (?, ?, ?, ?, 'active', ?)";
+    $query = "INSERT INTO categories (name, description, status, display_order) VALUES (?, ?, 'active', ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param('ssssi', $name, $slug, $description, $image_url, $display_order);
+    $stmt->bind_param('ssi', $name, $description, $display_order);
     return $stmt->execute();
 }
 
@@ -91,15 +90,14 @@ function createCategory($name, $slug, $description, $image_url, $conn) {
  * @param int $id Category ID
  * @param string $name Category name
  * @param string $description Category description
- * @param string $image_url Category image
  * @param string $status Category status
  * @param mysqli $conn Database connection
  * @return bool
  */
-function updateCategory($id, $name, $description, $image_url, $status, $conn) {
-    $query = "UPDATE categories SET name = ?, description = ?, image_url = ?, status = ? WHERE id = ?";
+function updateCategory($id, $name, $description, $status, $conn) {
+    $query = "UPDATE categories SET name = ?, description = ?, status = ? WHERE id = ?";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param('ssssi', $name, $description, $image_url, $status, $id);
+    $stmt->bind_param('sssi', $name, $description, $status, $id);
     return $stmt->execute();
 }
 
