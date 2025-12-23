@@ -9,19 +9,53 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     
-    if ($action === 'add') {
+    // Check if this is a JSON request (from AJAX drag-drop)
+    $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($content_type, 'application/json') !== false) {
+        $json = json_decode(file_get_contents('php://input'), true);
+        $action = $json['action'] ?? '';
+        $_POST = $json; // Merge JSON into $_POST for consistency
+    }
+    
+    if ($action === 'reorder') {
+        // Handle AJAX reorder request
+        $order = $_POST['order'] ?? [];
+        if (!empty($order)) {
+            foreach ($order as $item) {
+                $product_id = intval($item['id'] ?? 0);
+                $position = intval($item['position'] ?? 0);
+                if ($product_id > 0) {
+                    $update_query = "UPDATE products SET display_order = ? WHERE id = ?";
+                    $update_stmt = $conn->prepare($update_query);
+                    $update_stmt->bind_param('ii', $position, $product_id);
+                    $update_stmt->execute();
+                    $update_stmt->close();
+                }
+            }
+            // Log the update
+            logWebsiteUpdate('Product', "Reordered products", "Updated product display order", 'Update', $conn);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+            exit;
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'No order data provided']);
+            exit;
+        }
+    } elseif ($action === 'add') {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
         $category_id = intval($_POST['category'] ?? 0);
         $quantity = intval($_POST['quantity'] ?? 0);
+        $is_hidden = isset($_POST['is_hidden']) && $_POST['is_hidden'] === 'on' ? 1 : 0;
         
         if (empty($name) || empty($price)) {
             $error = 'Product name and price are required.';
         } else {
-            $query = "INSERT INTO products (name, description, price, category_id, quantity) VALUES (?, ?, ?, ?, ?)";
+            $query = "INSERT INTO products (name, description, price, category_id, quantity, is_hidden) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param('ssdii', $name, $description, $price, $category_id, $quantity);
+            $stmt->bind_param('ssdiii', $name, $description, $price, $category_id, $quantity, $is_hidden);
             
             if ($stmt->execute()) {
                 $new_product_id = $stmt->insert_id;
@@ -71,6 +105,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             logWebsiteUpdate('Product', "Deleted product", "Removed product from inventory", 'Delete', $conn);
         } else {
             $error = 'Error deleting product: ' . $conn->error;
+        }
+    } elseif ($action === 'toggle_visibility') {
+        header('Content-Type: application/json');
+        
+        $product_id = intval($_POST['product_id'] ?? 0);
+        
+        if ($product_id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Invalid product ID']);
+            exit;
+        }
+        
+        // Get current hidden status
+        $check_query = "SELECT is_hidden FROM products WHERE id = ?";
+        $stmt = $conn->prepare($check_query);
+        $stmt->bind_param('i', $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            echo json_encode(['success' => false, 'message' => 'Product not found']);
+            exit;
+        }
+        
+        $product = $result->fetch_assoc();
+        $new_hidden_status = $product['is_hidden'] ? 0 : 1;
+        
+        // Update hidden status
+        $update_query = "UPDATE products SET is_hidden = ? WHERE id = ?";
+        $stmt = $conn->prepare($update_query);
+        $stmt->bind_param('ii', $new_hidden_status, $product_id);
+        
+        if ($stmt->execute()) {
+            // Get product name for logging
+            $name_query = "SELECT name FROM products WHERE id = ?";
+            $name_stmt = $conn->prepare($name_query);
+            $name_stmt->bind_param('i', $product_id);
+            $name_stmt->execute();
+            $name_result = $name_stmt->get_result();
+            $name_row = $name_result->fetch_assoc();
+            $product_name = $name_row['name'] ?? 'Unknown';
+            
+            // Log the action
+            if ($new_hidden_status) {
+                logWebsiteUpdate('Product', "Hid product: $product_name", "Product is now hidden from public site", 'Hide', $conn);
+            } else {
+                logWebsiteUpdate('Product', "Unhid product: $product_name", "Product is now visible on public site", 'Unhide', $conn);
+            }
+            
+            echo json_encode(['success' => true, 'message' => $new_hidden_status ? 'Product hidden' : 'Product unhidden']);
+            exit;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error updating product visibility']);
+            exit;
         }
     } elseif ($action === 'upload_showcase_image') {
         $product_id = intval($_POST['product_id'] ?? 0);
@@ -245,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $all_categories = getAllCategories($conn);
 
 // Fetch all products with category names
-$products_query = "SELECT p.*, COALESCE(c.name, 'Uncategorized') as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC";
+$products_query = "SELECT p.*, COALESCE(c.name, 'Uncategorized') as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.display_order ASC, p.name ASC";
 $products_result = $conn->query($products_query);
 $products = $products_result->fetch_all(MYSQLI_ASSOC);
 
@@ -345,11 +432,208 @@ if (isset($_GET['edit'])) {
             justify-content: space-between;
             align-items: center;
         }
+
+        /* Dark Theme Styling */
+        body {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .container-fluid {
+            background: #1a1a1a;
+        }
+
+        .main-content {
+            background: #1a1a1a;
+        }
+
+        .page-header {
+            color: #e0e0e0;
+            padding: 20px 0;
+            border-bottom: 1px solid #444;
+            margin-bottom: 20px;
+        }
+
+        .page-header h1 {
+            color: #fff;
+        }
+
+        .card {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .card-header {
+            background: #1f1f1f;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .card-header h5 {
+            color: #fff;
+        }
+
+        .form-control, .form-select {
+            background: #333;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: #333;
+            border-color: #0d6efd;
+            color: #e0e0e0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .form-label {
+            color: #e0e0e0;
+        }
+
+        .alert {
+            border-color: #555;
+        }
+
+        .alert-success {
+            background: #1e4620;
+            border-color: #51cf66;
+            color: #51cf66;
+        }
+
+        .alert-danger {
+            background: #4a1f1f;
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .btn-primary {
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .btn-primary:hover {
+            background: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #c82333;
+        }
+
+        .badge {
+            background: #444;
+            color: #fff;
+        }
+
+        .badge.bg-secondary {
+            background: #5a5a5a !important;
+        }
+
+        .badge.bg-info {
+            background: #0d6efd !important;
+            color: #fff;
+        }
+
+        .badge.bg-warning {
+            background: #ffc107 !important;
+            color: #000;
+        }
+
+        .badge.bg-danger {
+            background: #dc3545 !important;
+            color: #fff;
+        }
+
+        .badge.bg-success {
+            background: #198754 !important;
+            color: #fff;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .modal-header {
+            background: #1f1f1f;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-title {
+            color: #fff;
+        }
+
+        .list-group {
+            background: transparent;
+        }
+
+        .list-group-item {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .variant-item {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        table.table {
+            color: #e0e0e0;
+            border-color: #444;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        .table thead {
+            border-color: #444;
+        }
+
+        .table-secondary {
+            background-color: #1f1f1f;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .text-muted {
+            color: #a0a0a0 !important;
+        }
+
+        small {
+            color: #a0a0a0;
+        }
     </style>
 </head>
-<body>
+<body class="bg-dark text-light">
     <div class="container-fluid">
-        <div class="row">
+        <div class="row g-0">
             <!-- Sidebar -->
             <?php include('_sidebar.php'); ?>
 
@@ -891,7 +1175,7 @@ if (isset($_GET['edit'])) {
                     <!-- Products List View -->
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">All Products</h5>
+                            <h5 class="mb-0">All Products (Drag to Reorder)</h5>
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
                                 <i class="fas fa-plus"></i> Add New Product
                             </button>
@@ -900,51 +1184,47 @@ if (isset($_GET['edit'])) {
                             <?php if (empty($products)): ?>
                                 <p class="text-muted text-center py-4">No products yet. Click "Add New Product" to create one.</p>
                             <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Category</th>
-                                                <th>Price</th>
-                                                <th>Stock</th>
-                                                <th>Images</th>
-                                                <th>Created</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($products as $product): 
-                                                $prod_images = getProductImages($product['id'], $conn);
-                                                $img_count = count($prod_images);
-                                            ?>
-                                                <tr>
-                                                    <td><strong>#<?php echo $product['id']; ?></strong></td>
-                                                    <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                                    <td><span class="badge bg-secondary"><?php echo htmlspecialchars($product['category_name'] ?? 'N/A'); ?></span></td>
-                                                    <td><strong>$<?php echo number_format($product['price'], 2); ?></strong></td>
-                                                    <td><?php echo $product['quantity']; ?></td>
-                                                    <td>
+                                <div id="sortable-products" class="list-group">
+                                    <?php foreach ($products as $product):
+                                        $prod_images = getProductImages($product['id'], $conn);
+                                        $img_count = count($prod_images);
+                                    ?>
+                                        <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-product-id="<?php echo $product['id']; ?>" style="cursor: grab; background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 15px; border-radius: 6px;">
+                                            <div class="d-flex align-items-center flex-grow-1">
+                                                <i class="fas fa-grip-vertical me-3" style="cursor: grab; color: var(--text-secondary);"></i>
+                                                <div>
+                                                    <strong style="color: var(--text-primary);">
+                                                        <?php echo htmlspecialchars($product['name']); ?>
+                                                        <?php if ($product['is_hidden']): ?>
+                                                            <span class="badge bg-danger" style="margin-left: 8px;"><i class="fas fa-eye-slash"></i> Hidden</span>
+                                                        <?php endif; ?>
+                                                    </strong>
+                                                    <br>
+                                                    <small style="color: var(--text-muted);">
+                                                        <span class="badge bg-secondary"><?php echo htmlspecialchars($product['category_name']); ?></span>
+                                                        <span class="badge bg-info">$<?php echo number_format($product['price'], 2); ?></span>
+                                                        <span class="badge bg-warning text-dark">Stock: <?php echo $product['quantity']; ?></span>
                                                         <?php if ($img_count > 0): ?>
                                                             <span class="badge bg-success"><i class="fas fa-image"></i> <?php echo $img_count; ?></span>
                                                         <?php else: ?>
-                                                            <span class="badge bg-warning text-dark">0 images</span>
+                                                            <span class="badge bg-danger">0 images</span>
                                                         <?php endif; ?>
-                                                    </td>
-                                                    <td><small><?php echo date('M d, Y', strtotime($product['created_at'])); ?></small></td>
-                                                    <td>
-                                                        <a href="?edit=<?php echo $product['id']; ?>" class="btn btn-sm btn-primary">
-                                                            <i class="fas fa-pencil"></i> Edit
-                                                        </a>
-                                                        <button class="btn btn-sm btn-danger" onclick="deleteProduct(<?php echo $product['id']; ?>)">
-                                                            <i class="fas fa-trash"></i> Delete
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <button class="btn btn-sm <?php echo $product['is_hidden'] ? 'btn-success' : 'btn-warning'; ?>" onclick="toggleProductVisibility(<?php echo $product['id']; ?>, <?php echo $product['is_hidden']; ?>)" title="<?php echo $product['is_hidden'] ? 'Unhide product' : 'Hide product'; ?>">
+                                                    <i class="fas <?php echo $product['is_hidden'] ? 'fa-eye' : 'fa-eye-slash'; ?>"></i>
+                                                </button>
+                                                <a href="?edit=<?php echo $product['id']; ?>" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteProduct(<?php echo $product['id']; ?>)">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -998,6 +1278,16 @@ if (isset($_GET['edit'])) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="new_is_hidden" name="is_hidden">
+                                <label class="form-check-label" for="new_is_hidden">
+                                    <i class="fas fa-eye-slash"></i> Hide from public site (for releases)
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-2">Check this to create the product hidden. You can unhide it anytime from the product list.</small>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1034,11 +1324,104 @@ if (isset($_GET['edit'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="<?php echo SITE_URL; ?>js/admin.js"></script>
     <script src="<?php echo SITE_URL; ?>js/admin_file_manager.js"></script>
     <script>
+        // Initialize drag-and-drop sorting for products
+        const sortableContainer = document.getElementById('sortable-products');
+        
+        if (sortableContainer) {
+            const sortable = Sortable.create(sortableContainer, {
+                animation: 150,
+                handle: '.fa-grip-vertical',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function(evt) {
+                    saveNewOrder();
+                }
+            });
+        }
+        
+        // Save the new order to the server
+        function saveNewOrder() {
+            const items = document.querySelectorAll('.sortable-item');
+            const order = [];
+            let position = 0;
+            
+            items.forEach(item => {
+                const productId = item.getAttribute('data-product-id');
+                order.push({
+                    id: productId,
+                    position: position
+                });
+                position++;
+            });
+            
+            // Send AJAX request to save order
+            fetch('<?php echo SITE_URL; ?>admin/products.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'reorder',
+                    order: order
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Optional: Show success message
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show';
+                    alert.innerHTML = `
+                        <strong>Order saved!</strong> Product order has been updated.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.page-header').parentElement.insertBefore(alert, document.querySelector('.page-header').nextSibling);
+                    setTimeout(() => alert.remove(), 3000);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
         // Declare fileManager globally (avoid duplicate declarations)
         var fileManager = null;
+
+        function toggleProductVisibility(productId, isHidden) {
+            // Show loading state
+            const btn = event.target.closest('button');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            // Send AJAX request
+            fetch('products.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `action=toggle_visibility&product_id=${productId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload page to show updated state
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to toggle product visibility'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error toggling product visibility');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            });
+        }
 
         function deleteProduct(productId) {
             document.getElementById('deleteProductId').value = productId;
@@ -1054,6 +1437,22 @@ if (isset($_GET['edit'])) {
             }
         });
         <?php endif; ?>
+
+        // Add CSS for drag-and-drop styling
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .sortable-ghost {
+                opacity: 0.4;
+                background: #f5f5f5;
+            }
+            .sortable-drag {
+                opacity: 0;
+            }
+            .sortable-item {
+                transition: transform 0.15s ease, opacity 0.15s ease;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

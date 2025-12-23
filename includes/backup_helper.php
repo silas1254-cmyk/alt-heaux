@@ -390,35 +390,35 @@ function deleteDirectory($dir) {
 }
 
 // ============================================
-// ADMIN ACTIVITY LOGGING
+// ADMIN ACTIVITY LOGGING (DEPRECATED - Use audit_helper.php instead)
 // ============================================
 
 /**
  * Log admin action for audit trail
+ * @deprecated Use logAuditEvent() from audit_helper.php instead
  */
 function logAdminAction($conn, $admin_id, $action, $details = '') {
-    $ip_address = $_SERVER['REMOTE_ADDR'] ?? '';
+    // Load audit helper if not already loaded
+    if (!function_exists('logAuditEvent')) {
+        require_once __DIR__ . '/audit_helper.php';
+    }
     
-    $stmt = $conn->prepare("
-        INSERT INTO admin_logs (admin_id, action, details, ip_address, created_at)
-        VALUES (?, ?, ?, ?, NOW())
-    ");
-    $stmt->bind_param('isss', $admin_id, $action, $details, $ip_address);
-    return $stmt->execute();
+    // Delegate to new unified audit system
+    return logAuditEvent($admin_id, 'ACTION', 'Admin', substr($action, 0, 50), $action, $details);
 }
 
 /**
- * Get admin activity logs
+ * Get admin activity logs (DEPRECATED)
+ * @deprecated Use getAuditLog() from audit_helper.php instead
  */
 function getAdminLogs($conn, $limit = 100) {
-    $result = $conn->query("
-        SELECT l.*, a.username
-        FROM admin_logs l
-        LEFT JOIN admins a ON l.admin_id = a.id
-        ORDER BY l.created_at DESC
-        LIMIT $limit
-    ");
-    return $result->fetch_all(MYSQLI_ASSOC);
+    // Load audit helper if not already loaded
+    if (!function_exists('getAuditLog')) {
+        require_once __DIR__ . '/audit_helper.php';
+    }
+    
+    // Return ACTION type logs from unified audit system
+    return getAuditLog($limit, 0, 'ACTION');
 }
 
 // ============================================

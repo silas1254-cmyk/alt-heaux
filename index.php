@@ -14,7 +14,7 @@ header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
 require 'includes/header.php';
 
 // Get featured products (limit 4)
-$featured_query = "SELECT id, name, description, price, image_url, quantity FROM products LIMIT 4";
+$featured_query = "SELECT id, name, description, price, image_url, quantity FROM products WHERE is_hidden = 0 ORDER BY display_order ASC, name ASC LIMIT 4";
 $featured_result = $conn->query($featured_query);
 $featured_products = $featured_result->fetch_all(MYSQLI_ASSOC);
 

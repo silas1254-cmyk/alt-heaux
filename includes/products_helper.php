@@ -134,7 +134,7 @@ function updateCategoryOrder($id, $display_order, $conn) {
  * @return array Products in category
  */
 function getProductsByCategory($category_id, $conn) {
-    $query = "SELECT id, name, description, price, image_url, quantity FROM products WHERE category_id = ? ORDER BY name ASC";
+    $query = "SELECT id, name, description, price, image_url, quantity FROM products WHERE category_id = ? AND is_hidden = 0 ORDER BY display_order ASC, name ASC";
     $stmt = $conn->prepare($query);
     $stmt->bind_param('i', $category_id);
     $stmt->execute();
@@ -159,7 +159,7 @@ function getFilteredProducts($filters, $conn) {
                 COALESCE(pi.image_path, '') as image_url
               FROM products p
               LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
-              WHERE 1=1";
+              WHERE p.is_hidden = 0";
     $params = [];
     $types = '';
 
@@ -189,7 +189,7 @@ function getFilteredProducts($filters, $conn) {
         $types .= 'ss';
     }
 
-    $query .= " ORDER BY p.name ASC";
+    $query .= " ORDER BY p.display_order ASC, p.name ASC";
 
     $stmt = $conn->prepare($query);
     

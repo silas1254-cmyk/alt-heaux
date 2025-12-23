@@ -194,8 +194,10 @@ if (isset($_GET['edit'])) {
                                             <i class="fas fa-grip-vertical me-3" style="cursor: grab; color: var(--text-secondary);"></i>
                                             <div>
                                                 <strong style="color: var(--text-primary);"><?php echo htmlspecialchars($cat['name']); ?></strong>
+                                                <?php if (!empty($cat['description'])): ?>
                                                 <br>
-                                                <small style="color: var(--text-muted);"><code style="color: var(--accent-gold);"><?php echo htmlspecialchars($cat['slug']); ?></code></small>
+                                                <small style="color: var(--text-muted);"><?php echo htmlspecialchars($cat['description']); ?></small>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                         <div class="d-flex align-items-center gap-2">

@@ -2,6 +2,9 @@
 /**
  * Website Updates/Changelog Management Functions
  * Tracks all changes made to the website
+ * 
+ * NOTE: This file provides legacy wrapper functions for backward compatibility.
+ * New code should use audit_helper.php and the logAuditEvent() function instead.
  */
 
 if (defined('UPDATES_HELPER_LOADED')) {
@@ -9,8 +12,11 @@ if (defined('UPDATES_HELPER_LOADED')) {
 }
 define('UPDATES_HELPER_LOADED', true);
 
+require_once __DIR__ . '/audit_helper.php';
+
 /**
- * Log a website update
+ * Log a website update (DEPRECATED - Use logAuditEvent instead)
+ * @deprecated Use logAuditEvent() from audit_helper.php instead
  * @param string $category Update category (e.g., 'Product', 'Page', 'Settings', 'User', 'Design')
  * @param string $title Title of the update
  * @param string $description Detailed description of what was changed
@@ -23,16 +29,13 @@ function logWebsiteUpdate($category, $title, $description, $update_type = 'Updat
     
     $admin_id = isset($_SESSION['admin_id']) ? intval($_SESSION['admin_id']) : null;
     
-    $query = "INSERT INTO website_updates (admin_id, category, title, description, update_type) VALUES (?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param('issss', $admin_id, $category, $title, $description, $update_type);
-    $success = $stmt->execute();
-    $stmt->close();
-    return $success;
+    // Delegate to new unified audit system
+    return logAuditEvent($admin_id, 'CHANGE', $category, $update_type, $title, $description);
 }
 
 /**
- * Get all website updates with pagination
+ * Get all website updates with pagination (DEPRECATED)
+ * @deprecated Use getAuditLog() from audit_helper.php instead
  * @param int $limit Number of updates per page
  * @param int $offset Offset for pagination
  * @param mysqli $conn Database connection
@@ -43,45 +46,56 @@ function getWebsiteUpdates($limit = 20, $offset = 0, $conn = null) {
     
     // Check if table exists
     $table_check = $conn->query("SHOW TABLES LIKE 'website_updates'");
-    if ($table_check->num_rows === 0) {
-        return [];
-    }
+    $legacy_exists = $table_check && $table_check->num_rows > 0;
     
     $limit = intval($limit);
     $offset = intval($offset);
     
-    $query = "SELECT 
-                wu.id,
-                wu.category,
-                wu.title,
-                wu.description,
-                wu.update_type,
-                wu.created_at,
-                au.username as admin_name,
-                au.email as admin_email
-              FROM website_updates wu
-              LEFT JOIN admin_users au ON wu.admin_id = au.id
-              ORDER BY wu.created_at DESC
-              LIMIT ? OFFSET ?";
-    
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        return [];
+    // If audit_log table exists, use it (new unified system)
+    $table_check = $conn->query("SHOW TABLES LIKE 'audit_log'");
+    if ($table_check && $table_check->num_rows > 0) {
+        // Return from unified audit_log
+        return getAuditLog($limit, $offset, 'CHANGE');
     }
     
-    $stmt->bind_param('ii', $limit, $offset);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $updates = [];
-    while ($row = $result->fetch_assoc()) {
-        $updates[] = $row;
+    // Fallback to legacy website_updates table if it still exists
+    if ($legacy_exists) {
+        $query = "SELECT 
+                    wu.id,
+                    wu.category,
+                    wu.title,
+                    wu.description,
+                    wu.update_type,
+                    wu.created_at,
+                    au.username as admin_name,
+                    au.email as admin_email
+                  FROM website_updates wu
+                  LEFT JOIN admin_users au ON wu.admin_id = au.id
+                  ORDER BY wu.created_at DESC
+                  LIMIT ? OFFSET ?";
+        
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            return [];
+        }
+        
+        $stmt->bind_param('ii', $limit, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $updates = [];
+        while ($row = $result->fetch_assoc()) {
+            $updates[] = $row;
+        }
+        $stmt->close();
+        return $updates;
     }
-    $stmt->close();
-    return $updates;
+    
+    return [];
 }
 
 /**
- * Get updates by category
+ * Get updates by category (DEPRECATED)
+ * @deprecated Use getAuditLog() with category filter instead
  * @param string $category Category to filter
  * @param int $limit Number of updates
  * @param mysqli $conn Database connection
@@ -108,6 +122,10 @@ function getUpdatesByCategory($category, $limit = 20, $conn = null) {
               LIMIT ?";
     
     $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        return [];
+    }
+    
     $stmt->bind_param('si', $category, $limit);
     $stmt->execute();
     $result = $stmt->get_result();

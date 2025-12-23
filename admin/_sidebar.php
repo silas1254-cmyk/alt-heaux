@@ -51,7 +51,7 @@
             <a href="<?php echo SITE_URL; ?>admin/manage_admins.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'manage_admins.php' ? 'active' : ''; ?>">
                 <i class="fas fa-users"></i> Manage Admins
             </a>
-            <a href="<?php echo SITE_URL; ?>admin/updates.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'updates.php' ? 'active' : ''; ?>">
+            <a href="<?php echo SITE_URL; ?>admin/audit_log.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'audit_log.php' ? 'active' : ''; ?>">
                 <i class="fas fa-history"></i> Audit Log
             </a>
         <?php endif; ?>
