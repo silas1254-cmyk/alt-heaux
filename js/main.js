@@ -426,54 +426,35 @@ function initializeCartEventListeners() {
     const qtyDecreaseButtons = document.querySelectorAll('[data-action="qty-decrease"]');
     console.log('Found ' + qtyIncreaseButtons.length + ' qty-increase buttons');
     console.log('Found ' + qtyDecreaseButtons.length + ' qty-decrease buttons');
+    
+    // Direct listeners on increase buttons
     qtyIncreaseButtons.forEach((btn, idx) => {
-        console.log('qty-increase button ' + idx + ':', btn.dataset);
-    });
-    qtyDecreaseButtons.forEach((btn, idx) => {
-        console.log('qty-decrease button ' + idx + ':', btn.dataset);
+        console.log('Attaching click listener to qty-increase button ' + idx);
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const productId = this.dataset.productId;
+            const color = this.dataset.color || '';
+            const size = this.dataset.size || '';
+            console.log('Qty increase clicked:', {productId, color, size});
+            updateQuantityByDirection(productId, 'up', color, size);
+            return false;
+        });
     });
     
-    // Set up event delegation for cart quantity buttons
-    document.addEventListener('click', function(e) {
-        console.log('Document click event:', e.target, e.target.tagName, e.target.className);
-        
-        // Handle quantity increase button
-        let qtyIncreaseBtn = e.target.closest('[data-action="qty-increase"]');
-        if (qtyIncreaseBtn) {
-            console.log('Matched qty-increase button');
+    // Direct listeners on decrease buttons
+    qtyDecreaseButtons.forEach((btn, idx) => {
+        console.log('Attaching click listener to qty-decrease button ' + idx);
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            const productId = qtyIncreaseBtn.dataset.productId;
-            const color = qtyIncreaseBtn.dataset.color || '';
-            const size = qtyIncreaseBtn.dataset.size || '';
-            console.log('Qty increase clicked:', {productId, color, size, button: qtyIncreaseBtn});
-            
-            if (typeof updateQuantityByDirection === 'function') {
-                updateQuantityByDirection(productId, 'up', color, size);
-            } else {
-                console.error('updateQuantityByDirection is not a function!');
-            }
+            const productId = this.dataset.productId;
+            const color = this.dataset.color || '';
+            const size = this.dataset.size || '';
+            console.log('Qty decrease clicked:', {productId, color, size});
+            updateQuantityByDirection(productId, 'down', color, size);
             return false;
-        }
-        
-        // Handle quantity decrease button
-        let qtyDecreaseBtn = e.target.closest('[data-action="qty-decrease"]');
-        if (qtyDecreaseBtn) {
-            console.log('Matched qty-decrease button');
-            e.preventDefault();
-            e.stopPropagation();
-            const productId = qtyDecreaseBtn.dataset.productId;
-            const color = qtyDecreaseBtn.dataset.color || '';
-            const size = qtyDecreaseBtn.dataset.size || '';
-            console.log('Qty decrease clicked:', {productId, color, size, button: qtyDecreaseBtn});
-            
-            if (typeof updateQuantityByDirection === 'function') {
-                updateQuantityByDirection(productId, 'down', color, size);
-            } else {
-                console.error('updateQuantityByDirection is not a function!');
-            }
-            return false;
-        }
+        });
     });
 }
 
