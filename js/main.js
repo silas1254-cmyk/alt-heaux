@@ -102,9 +102,6 @@ function addToCart(productId, quantity = 1, productName = '') {
  * Remove product from cart
  */
 function removeFromCart(productId, color = '', size = '') {
-    console.log('removeFromCart called with productId:', productId, 'color:', color, 'size:', size);
-    console.log('Sending request to:', CART_API_URL);
-    
     if (!confirm('Remove this item from your cart?')) {
         return;
     }
@@ -119,24 +116,17 @@ function removeFromCart(productId, color = '', size = '') {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Remove response:', data);
         if (data.success) {
-            console.log('Item removed successfully');
             showToast('success', 'Item removed from cart');
             updateCartBadge();
             
             // Reload cart page if on cart.php
             if (window.location.href.includes('pages/cart.php')) {
-                console.log('Reloading cart page...');
                 setTimeout(() => location.reload(), 500);
             }
         } else {
-            console.error('Remove failed:', data.message);
             showToast('danger', data.message || 'Error removing item');
         }
     })
@@ -187,8 +177,6 @@ function updateQuantity(productId, quantity) {
  * Used for +/- buttons on cart page
  */
 function updateQuantityByDirection(productId, direction, color = '', size = '') {
-    console.log('updateQuantityByDirection called:', {productId, direction, color, size});
-    
     // Ensure productId is a number
     productId = parseInt(productId);
     if (!productId || !direction) {
@@ -204,8 +192,6 @@ function updateQuantityByDirection(productId, direction, color = '', size = '') 
         size: size || ''
     };
     
-    console.log('Sending request:', requestData);
-    
     fetch(CART_API_URL, {
         method: 'POST',
         headers: {
@@ -213,21 +199,14 @@ function updateQuantityByDirection(productId, direction, color = '', size = '') 
         },
         body: JSON.stringify(requestData)
     })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Update response:', data);
         if (data.success) {
-            console.log('Quantity updated successfully');
             showToast('success', 'Quantity updated');
             updateCartBadge();
             // Refresh page to show updated totals
-            console.log('Reloading page...');
             setTimeout(() => location.reload(), 300);
         } else {
-            console.error('Update failed:', data.message);
             showToast('danger', 'Error updating quantity: ' + (data.message || 'Unknown error'));
         }
     })
@@ -417,48 +396,37 @@ function initializeSmoothScroll() {
  * Called when main.js loads to set up delegation for cart actions
  */
 function initializeCartEventListeners() {
-    console.log('Initializing cart event listeners...');
-    console.log('CART_API_URL:', typeof CART_API_URL !== 'undefined' ? CART_API_URL : 'UNDEFINED');
-    console.log('updateQuantityByDirection function:', typeof updateQuantityByDirection);
-    
-    // Debug: Find all cart action buttons
+    // Find all cart action buttons
     const qtyIncreaseButtons = document.querySelectorAll('[data-action="qty-increase"]');
     const qtyDecreaseButtons = document.querySelectorAll('[data-action="qty-decrease"]');
-    console.log('Found ' + qtyIncreaseButtons.length + ' qty-increase buttons');
-    console.log('Found ' + qtyDecreaseButtons.length + ' qty-decrease buttons');
     
     // Direct listeners on increase buttons
-    qtyIncreaseButtons.forEach((btn, idx) => {
-        console.log('Attaching click listener to qty-increase button ' + idx);
+    qtyIncreaseButtons.forEach((btn) => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             const productId = this.dataset.productId;
             const color = this.dataset.color || '';
             const size = this.dataset.size || '';
-            console.log('Qty increase clicked:', {productId, color, size});
             updateQuantityByDirection(productId, 'up', color, size);
             return false;
         });
     });
     
     // Direct listeners on decrease buttons
-    qtyDecreaseButtons.forEach((btn, idx) => {
-        console.log('Attaching click listener to qty-decrease button ' + idx);
+    qtyDecreaseButtons.forEach((btn) => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             const productId = this.dataset.productId;
             const color = this.dataset.color || '';
             const size = this.dataset.size || '';
-            console.log('Qty decrease clicked:', {productId, color, size});
             updateQuantityByDirection(productId, 'down', color, size);
             return false;
         });
     });
 }
 
-// Auto-initialize cart listeners when main.js loads
-console.log('main.js loaded, readyState:', document.readyState);
+// Initialize cart listeners when main.js loads
 initializeCartEventListeners();
 

@@ -319,8 +319,6 @@
          * This listener works on current AND dynamically added elements
          */
         document.addEventListener('click', function(e) {
-            console.log('Click event detected:', e.target);
-            
             // Handle remove item buttons in dropdown - call main.js removeFromCart
             if (e.target.closest('button[data-action="remove-item"]')) {
                 const btn = e.target.closest('button[data-action="remove-item"]');
@@ -328,17 +326,13 @@
                 const color = btn.dataset.color || '';
                 const size = btn.dataset.size || '';
                 
-                console.log('Remove button clicked in dropdown - removing item:', productId, color, size);
                 e.preventDefault();
                 e.stopPropagation();
                 
                 // Call main.js removeFromCart function which handles the API call and page reload
                 if (typeof removeFromCart === 'function') {
-                    console.log('removeFromCart function available, calling it');
                     removeFromCart(productId, color, size);
                 } else {
-                    console.error('ERROR: removeFromCart function not available yet');
-                    // Fallback: show error message
                     alert('System is loading. Please try again in a moment.');
                 }
                 return;
