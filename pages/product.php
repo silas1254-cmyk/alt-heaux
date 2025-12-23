@@ -205,7 +205,7 @@ require '../includes/header.php';
                     </label>
                     <div class="d-flex align-items-center gap-2">
                         <button type="button" class="btn btn-outline-secondary" id="decreaseQty" style="width: 40px; height: 40px; padding: 0; font-size: 1.2rem;">−</button>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" 
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="999"
                                style="width: 60px; text-align: center; border: 2px solid #ddd; border-radius: 8px; padding: 0.5rem; font-weight: 600;">
                         <button type="button" class="btn btn-outline-secondary" id="increaseQty" style="width: 40px; height: 40px; padding: 0; font-size: 1.2rem;">+</button>
                     </div>
@@ -319,98 +319,6 @@ require '../includes/header.php';
         document.getElementById('selectedSize').value = button.dataset.size;
     }
 
-    // Quantity controls
-    document.getElementById('decreaseQty')?.addEventListener('click', function() {
-        const input = document.getElementById('quantity');
-        if (input.value > 1) {
-            input.value = parseInt(input.value) - 1;
-        }
-    });
-
-    document.getElementById('increaseQty')?.addEventListener('click', function() {
-        const input = document.getElementById('quantity');
-        const max = parseInt(input.max);
-        if (parseInt(input.value) < max) {
-            input.value = parseInt(input.value) + 1;
-        }
-    });
-
-    // Form submission
-    document.getElementById('addToCartForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const productId = document.querySelector('input[name="product_id"]').value;
-        const quantity = parseInt(document.getElementById('quantity').value);
-        const color = document.getElementById('selectedColor')?.value || '';
-        const size = document.getElementById('selectedSize')?.value || '';
-
-        // Validation: Check if color is required and not selected
-        const hasColors = document.querySelectorAll('.color-btn').length > 0;
-        const hasSizes = document.querySelectorAll('.size-btn').length > 0;
-
-        if (hasColors && !color) {
-            showErrorModal('Please select a color before adding to cart');
-            return;
-        }
-
-        if (hasSizes && !size) {
-            showErrorModal('Please select a size before adding to cart');
-            return;
-        }
-
-        try {
-            const response = await fetch('<?php echo SITE_URL; ?>pages/cart_api.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=add&product_id=${productId}&quantity=${quantity}&color=${encodeURIComponent(color)}&size=${encodeURIComponent(size)}`
-            });
-
-            // Check if response is ok
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const text = await response.text();
-            console.log('Cart API raw response:', text);
-            
-            const result = JSON.parse(text);
-            console.log('Cart API response:', result);
-
-            if (result && result.success) {
-                showSuccessModal('Product added to cart!');
-                // Reset form
-                document.getElementById('addToCartForm').reset();
-                const colorInput = document.getElementById('selectedColor');
-                const sizeInput = document.getElementById('selectedSize');
-                if (colorInput) colorInput.value = '';
-                if (sizeInput) sizeInput.value = '';
-                document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
-                
-                // Update cart UI
-                setTimeout(() => {
-                    // Update cart badge
-                    const cartBadge = document.querySelector('.cart-count-badge');
-                    if (cartBadge && result.cart_count !== undefined) {
-                        cartBadge.textContent = result.cart_count;
-                        cartBadge.style.display = result.cart_count > 0 ? 'inline' : 'none';
-                    }
-                    // Reload cart preview
-                    if (window.loadCartPreview) {
-                        loadCartPreview();
-                    }
-                }, 300);
-            } else {
-                showErrorModal((result && result.message) || 'Error adding to cart');
-            }
-        } catch (error) {
-            showErrorModal('Error adding to cart: ' + error.message);
-            console.error('Error:', error);
-        }
-    });
-
     // Error Modal
     function showErrorModal(message) {
         const modal = document.createElement('div');
@@ -485,7 +393,100 @@ require '../includes/header.php';
         }, 2000);
     }
 
-    // Animation for modals
+    // Initialize event listeners when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Quantity controls
+        document.getElementById('decreaseQty')?.addEventListener('click', function() {
+            const input = document.getElementById('quantity');
+            if (input.value > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        });
+
+        document.getElementById('increaseQty')?.addEventListener('click', function() {
+            const input = document.getElementById('quantity');
+            const max = parseInt(input.max);
+            if (parseInt(input.value) < max) {
+                input.value = parseInt(input.value) + 1;
+            }
+        });
+
+        // Form submission
+        document.getElementById('addToCartForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const productId = document.querySelector('input[name="product_id"]').value;
+        const quantity = parseInt(document.getElementById('quantity').value);
+        const color = document.getElementById('selectedColor')?.value || '';
+        const size = document.getElementById('selectedSize')?.value || '';
+
+        // Validation: Check if color is required and not selected
+        const hasColors = document.querySelectorAll('.color-btn').length > 0;
+        const hasSizes = document.querySelectorAll('.size-btn').length > 0;
+
+        if (hasColors && !color) {
+            showErrorModal('Please select a color before adding to cart');
+            return;
+        }
+
+        if (hasSizes && !size) {
+            showErrorModal('Please select a size before adding to cart');
+            return;
+        }
+
+        try {
+            const response = await fetch('<?php echo SITE_URL; ?>pages/cart_api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=add&product_id=${productId}&quantity=${quantity}&color=${encodeURIComponent(color)}&size=${encodeURIComponent(size)}`
+            });
+
+            // Check if response is ok
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const text = await response.text();
+            console.log('Cart API raw response:', text);
+            
+            const result = JSON.parse(text);
+            console.log('Cart API response:', result);
+
+            if (result && result.success) {
+                showSuccessModal('Product added to cart!');
+                // Reset form
+                document.getElementById('addToCartForm').reset();
+                const colorInput = document.getElementById('selectedColor');
+                const sizeInput = document.getElementById('selectedSize');
+                if (colorInput) colorInput.value = '';
+                if (sizeInput) sizeInput.value = '';
+                document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+                
+                // Update cart UI
+                setTimeout(() => {
+                    // Update cart badge
+                    const cartBadge = document.querySelector('.cart-count-badge');
+                    if (cartBadge && result.cart_count !== undefined) {
+                        cartBadge.textContent = result.cart_count;
+                        cartBadge.style.display = result.cart_count > 0 ? 'inline' : 'none';
+                    }
+                    // Reload cart preview
+                    if (window.loadCartPreview) {
+                        loadCartPreview();
+                    }
+                }, 300);
+            } else {
+                showErrorModal((result && result.message) || 'Error adding to cart');
+            }
+        } catch (error) {
+            showErrorModal('Error adding to cart: ' + error.message);
+            console.error('Error:', error);
+        }
+    });
+    });
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideDown {
