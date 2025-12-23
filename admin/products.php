@@ -13,15 +13,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
-        $category = trim($_POST['category'] ?? '');
+        $category_id = intval($_POST['category'] ?? 0);
         $quantity = intval($_POST['quantity'] ?? 0);
         
         if (empty($name) || empty($price)) {
             $error = 'Product name and price are required.';
         } else {
-            $query = "INSERT INTO products (name, description, price, category, quantity) VALUES (?, ?, ?, ?, ?)";
+            $query = "INSERT INTO products (name, description, price, category_id, quantity) VALUES (?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param('ssdsi', $name, $description, $price, $category, $quantity);
+            $stmt->bind_param('ssdii', $name, $description, $price, $category_id, $quantity);
             
             if ($stmt->execute()) {
                 $new_product_id = $stmt->insert_id;
@@ -40,15 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
-        $category = trim($_POST['category'] ?? '');
+        $category_id = intval($_POST['category'] ?? 0);
         $quantity = intval($_POST['quantity'] ?? 0);
         
         if (empty($name) || empty($price)) {
             $error = 'Product name and price are required.';
         } else {
-            $query = "UPDATE products SET name = ?, description = ?, price = ?, category = ?, quantity = ? WHERE id = ?";
+            $query = "UPDATE products SET name = ?, description = ?, price = ?, category_id = ?, quantity = ? WHERE id = ?";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param('ssdsii', $name, $description, $price, $category, $quantity, $product_id);
+            $stmt->bind_param('ssdiii', $name, $description, $price, $category_id, $quantity, $product_id);
             
             if ($stmt->execute()) {
                 $success = 'Product updated successfully!';
@@ -244,8 +244,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Fetch all categories
 $all_categories = getAllCategories($conn);
 
-// Fetch all products
-$products_query = "SELECT * FROM products ORDER BY created_at DESC";
+// Fetch all products with category names
+$products_query = "SELECT p.*, COALESCE(c.name, 'Uncategorized') as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC";
 $products_result = $conn->query($products_query);
 $products = $products_result->fetch_all(MYSQLI_ASSOC);
 
@@ -419,7 +419,7 @@ if (isset($_GET['edit'])) {
                                             <select class="form-control" id="category" name="category">
                                                 <option value="">Select Category</option>
                                                 <?php foreach ($all_categories as $cat): ?>
-                                                    <option value="<?php echo htmlspecialchars($cat['name']); ?>" <?php echo ($edit_product['category'] === $cat['name']) ? 'selected' : ''; ?>>
+                                                    <option value="<?php echo $cat['id']; ?>" <?php echo ($edit_product['category_id'] == $cat['id']) ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($cat['name']); ?>
                                                     </option>
                                                 <?php endforeach; ?>
@@ -922,7 +922,7 @@ if (isset($_GET['edit'])) {
                                                 <tr>
                                                     <td><strong>#<?php echo $product['id']; ?></strong></td>
                                                     <td><?php echo htmlspecialchars($product['name']); ?></td>
-                                                    <td><span class="badge bg-secondary"><?php echo htmlspecialchars($product['category'] ?? 'N/A'); ?></span></td>
+                                                    <td><span class="badge bg-secondary"><?php echo htmlspecialchars($product['category_name'] ?? 'N/A'); ?></span></td>
                                                     <td><strong>$<?php echo number_format($product['price'], 2); ?></strong></td>
                                                     <td><?php echo $product['quantity']; ?></td>
                                                     <td>
@@ -992,7 +992,7 @@ if (isset($_GET['edit'])) {
                             <select class="form-control" id="new_category" name="category">
                                 <option value="">Select Category</option>
                                 <?php foreach ($all_categories as $cat): ?>
-                                    <option value="<?php echo htmlspecialchars($cat['name']); ?>">
+                                    <option value="<?php echo $cat['id']; ?>">
                                         <?php echo htmlspecialchars($cat['name']); ?>
                                     </option>
                                 <?php endforeach; ?>
