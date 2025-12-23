@@ -2,15 +2,8 @@
 /**
  * SHOPPING CART PAGE
  * Displays all items in the user's shopping cart with quantities, colors, sizes, and totals
- * URL: /pages/pages.php?section=cart
  * Supports both logged-in users (database cart) and guests (session cart)
  */
-
-// Redirect direct access to pages.php
-if (basename($_SERVER['PHP_SELF']) === 'cart.php') {
-    header('Location: pages.php?section=cart');
-    exit;
-}
 
 // Include database configuration and helper functions
 require '../includes/config.php';

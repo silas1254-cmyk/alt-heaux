@@ -65,7 +65,7 @@ require '../includes/header.php';
         <h1 class="mb-5">Contact Us</h1>
         
         <div class="alert alert-info">
-            <p><strong>No contact page configured.</strong> Create a "contact" page in the <a href="<?php echo SITE_URL; ?>admin/pages.php">Pages Manager</a>.</p>
+            <p><strong>No contact page configured.</strong> Contact content will be available soon.</p>
         </div>
 
         <div class="row">

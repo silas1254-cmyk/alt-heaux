@@ -18,12 +18,6 @@
     
     <div class="nav-section">
         <h6>Content Management</h6>
-        <a href="<?php echo SITE_URL; ?>admin/pages.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'pages.php' ? 'active' : ''; ?>">
-            <i class="fas fa-file"></i> Pages
-        </a>
-        <a href="<?php echo SITE_URL; ?>admin/page_editor.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'page_editor.php' ? 'active' : ''; ?>">
-            <i class="fas fa-edit"></i> Edit Pages
-        </a>
         <a href="<?php echo SITE_URL; ?>admin/sections.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'sections.php' ? 'active' : ''; ?>">
             <i class="fas fa-file-alt"></i> Sections
         </a>

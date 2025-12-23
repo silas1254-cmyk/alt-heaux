@@ -105,9 +105,6 @@ $total_revenue = $conn->query("SELECT SUM(total_amount) as total FROM orders")->
                                 <a href="<?php echo SITE_URL; ?>admin/sections.php" class="btn btn-outline-dark btn-sm d-block mb-2">
                                     <i class="bi bi-file-text"></i> Content Sections
                                 </a>
-                                <a href="<?php echo SITE_URL; ?>admin/pages.php" class="btn btn-outline-dark btn-sm d-block">
-                                    <i class="bi bi-file"></i> Pages
-                                </a>
                             </div>
                         </div>
                     </div>
