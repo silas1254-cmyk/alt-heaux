@@ -7,6 +7,7 @@
 
 // Include database configuration and helper functions
 require '../includes/config.php';
+require '../includes/header.php';
 
 // Get custom cart page content
 $cart_content = getSetting('cart_content', '');
@@ -390,4 +391,5 @@ function removeFromCart(productId, color = '', size = '') {
     });
 }
 </script>
+
 <?php require '../includes/footer.php'; ?>
