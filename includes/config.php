@@ -31,6 +31,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/admin_auth.php';
 require_once __DIR__ . '/user_auth.php';
 require_once __DIR__ . '/content_helper.php';
+require_once __DIR__ . '/page_builder_helper.php';
 require_once __DIR__ . '/products_helper.php';
 require_once __DIR__ . '/cart_helper.php';
 require_once __DIR__ . '/updates_helper.php';
