@@ -138,13 +138,14 @@ $products = getFilteredProducts($filters, $conn);
                             <!-- PRODUCT CARD COLUMN -->
                             <!-- Each card is responsive: 6 cols on tablet, 4 cols on desktop -->
                             <div class="col-md-6 col-lg-4">
-                                <div class="product-card">
+                                <!-- UNIFIED PRODUCT CARD -->
+                                <div class="card h-100 shadow-light border-0">
                                     <!-- PRODUCT IMAGE CONTAINER -->
                                     <!-- Gradient background with product image centered -->
-                                    <div class="product-image" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                                    <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 250px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                         <!-- Display primary product image if available -->
                                         <?php if (!empty($product['image_url'])): ?>
-                                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid p-3">
+                                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid p-3" style="max-height: 250px; object-fit: contain;">
                                         <?php else: ?>
                                             <!-- Placeholder shown when no image is available -->
                                             <div class="text-center text-muted">
@@ -154,30 +155,28 @@ $products = getFilteredProducts($filters, $conn);
                                         <?php endif; ?>
                                     </div>
                                     
-                                    <!-- PRODUCT INFO CARD -->
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <!-- PRODUCT NAME -->
-                                            <h5 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h5>
-                                            <!-- PRODUCT DESCRIPTION (truncated to 60 characters) -->
-                                            <p class="product-description"><?php echo htmlspecialchars(substr($product['description'] ?? '', 0, 60)); ?></p>
-                                            
-                                            <!-- PRICE AND AVAILABILITY SECTION -->
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <!-- Product price formatted to 2 decimal places -->
-                                                <span class="product-price">$<?php echo number_format($product['price'], 2); ?></span>
-                                                <!-- Availability badge -->
-                                                <small>
-                                                    <span class="badge badge-accent">Available</span>
-                                                </small>
-                                            </div>
-                                            
-                                            <!-- VIEW PRODUCT BUTTON -->
-                                            <!-- Links to detailed product page with ID parameter -->
-                                            <a href="<?php echo SITE_URL; ?>pages/product.php?id=<?php echo $product['id']; ?>" class="btn btn-dark w-100">
-                                                <i class="fas fa-eye"></i> View Product
-                                            </a>
+                                    <!-- PRODUCT INFO -->
+                                    <div class="card-body d-flex flex-column">
+                                        <!-- PRODUCT NAME -->
+                                        <h5 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h5>
+                                        <!-- PRODUCT DESCRIPTION (truncated to 60 characters) -->
+                                        <p class="product-description"><?php echo htmlspecialchars(substr($product['description'] ?? '', 0, 60)); ?></p>
+                                        
+                                        <!-- PRICE AND AVAILABILITY SECTION -->
+                                        <div class="d-flex justify-content-between align-items-center mb-3 mt-auto">
+                                            <!-- Product price formatted to 2 decimal places -->
+                                            <span class="product-price">$<?php echo number_format($product['price'], 2); ?></span>
+                                            <!-- Availability badge -->
+                                            <small>
+                                                <span class="badge badge-accent">Available</span>
+                                            </small>
                                         </div>
+                                        
+                                        <!-- VIEW PRODUCT BUTTON -->
+                                        <!-- Links to detailed product page with ID parameter -->
+                                        <a href="<?php echo SITE_URL; ?>pages/product.php?id=<?php echo $product['id']; ?>" class="btn btn-dark w-100">
+                                            <i class="fas fa-eye"></i> View Product
+                                        </a>
                                     </div>
                                 </div>
                             </div>
