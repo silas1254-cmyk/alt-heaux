@@ -183,6 +183,20 @@ function updateQuantity(productId, quantity) {
 }
 
 /**
+ * Handle quantity change from onclick handler on cart buttons
+ * Used as a backup if event listeners don't work
+ */
+function handleQtyChange(button, direction) {
+    console.log('handleQtyChange called:', direction);
+    const productId = button.dataset.productId;
+    const color = button.dataset.color || '';
+    const size = button.dataset.size || '';
+    console.log('updateQuantityByDirection:', {productId, direction, color, size});
+    updateQuantityByDirection(productId, direction, color, size);
+    return false;
+}
+
+/**
  * Update cart quantity by direction (increase/decrease)
  * Used for +/- buttons on cart page
  */
