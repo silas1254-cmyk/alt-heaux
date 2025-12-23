@@ -462,10 +462,3 @@ function initializeCartEventListeners() {
 console.log('main.js loaded, readyState:', document.readyState);
 initializeCartEventListeners();
 
-// Also try to re-initialize on DOMContentLoaded in case the first attempt missed the buttons
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOMContentLoaded fired, re-attempting to initialize cart listeners');
-        initializeCartEventListeners();
-    });
-}
