@@ -421,3 +421,346 @@ window.ModalManager = ModalManager;
 window.SpinnerManager = SpinnerManager;
 window.FormValidator = FormValidator;
 window.TableManager = TableManager;
+
+// ============================================================================
+// TOAST NOTIFICATION SYSTEM
+// ============================================================================
+
+class ToastManager {
+    constructor() {
+        this.container = document.querySelector('.toast-container');
+        if (!this.container) {
+            this.container = document.createElement('div');
+            this.container.className = 'toast-container';
+            document.body.appendChild(this.container);
+        }
+    }
+
+    show(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+
+        toast.innerHTML = `
+            <i class="fas ${icons[type]} toast-icon"></i>
+            <div class="toast-content">${message}</div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        this.container.appendChild(toast);
+
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        return toast;
+    }
+
+    success(message, duration = 3000) {
+        return this.show(message, 'success', duration);
+    }
+
+    error(message, duration = 5000) {
+        return this.show(message, 'error', duration);
+    }
+
+    warning(message, duration = 4000) {
+        return this.show(message, 'warning', duration);
+    }
+
+    info(message, duration = 3000) {
+        return this.show(message, 'info', duration);
+    }
+}
+
+window.ToastManager = new ToastManager();
+
+// ============================================================================
+// KEYBOARD SHORTCUTS
+// ============================================================================
+
+class KeyboardShortcuts {
+    constructor() {
+        this.shortcuts = {
+            'ctrl+s': { description: 'Save form', action: () => this.saveForm() },
+            'ctrl+shift+k': { description: 'Show shortcuts', action: () => this.showShortcuts() },
+            'esc': { description: 'Close modals', action: () => this.closeModals() }
+        };
+        this.attach();
+    }
+
+    attach() {
+        document.addEventListener('keydown', (e) => {
+            const key = this.getKeyCombo(e);
+            if (this.shortcuts[key]) {
+                e.preventDefault();
+                this.shortcuts[key].action();
+            }
+        });
+    }
+
+    getKeyCombo(e) {
+        const parts = [];
+        if (e.ctrlKey) parts.push('ctrl');
+        if (e.shiftKey) parts.push('shift');
+        if (e.altKey) parts.push('alt');
+        
+        if (e.key.length === 1) {
+            parts.push(e.key.toLowerCase());
+        } else if (e.key === 'Escape') {
+            return 'esc';
+        }
+        
+        return parts.join('+');
+    }
+
+    saveForm() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.submit();
+            window.ToastManager.success('Form saved!');
+        }
+    }
+
+    closeModals() {
+        document.querySelectorAll('.modal.show').forEach(modal => {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) bsModal.hide();
+        });
+    }
+
+    showShortcuts() {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade keyboard-shortcuts-modal';
+        modal.tabIndex = -1;
+        
+        let shortcutsHtml = '';
+        for (const [key, data] of Object.entries(this.shortcuts)) {
+            shortcutsHtml += `
+                <div class="shortcut-item">
+                    <span>${data.description}</span>
+                    <span class="key">${key.toUpperCase()}</span>
+                </div>
+            `;
+        }
+
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Keyboard Shortcuts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${shortcutsHtml}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+
+        modal.addEventListener('hidden.bs.modal', () => modal.remove());
+    }
+}
+
+window.KeyboardShortcuts = new KeyboardShortcuts();
+
+// ============================================================================
+// SIDEBAR COLLAPSE
+// ============================================================================
+
+class SidebarCollapseManager {
+    constructor() {
+        this.sidebar = document.querySelector('.sidebar');
+        this.init();
+    }
+
+    init() {
+        const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        if (isCollapsed) {
+            this.collapse();
+        }
+        
+        this.addCollapseButton();
+    }
+
+    addCollapseButton() {
+        if (!this.sidebar) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'sidebar-toggle-collapse';
+        btn.innerHTML = '<i class="fas fa-angle-left"></i> Collapse';
+        btn.addEventListener('click', () => this.toggle());
+
+        const logoutSection = this.sidebar.querySelector('.logout-section');
+        if (logoutSection) {
+            logoutSection.insertBefore(btn, logoutSection.firstChild);
+        }
+    }
+
+    toggle() {
+        if (this.sidebar.classList.contains('collapsed')) {
+            this.expand();
+        } else {
+            this.collapse();
+        }
+    }
+
+    collapse() {
+        this.sidebar.classList.add('collapsed');
+        localStorage.setItem('sidebar-collapsed', 'true');
+    }
+
+    expand() {
+        this.sidebar.classList.remove('collapsed');
+        localStorage.setItem('sidebar-collapsed', 'false');
+    }
+}
+
+// Initialize sidebar collapse after page loads
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.querySelector('.sidebar')) {
+        new SidebarCollapseManager();
+    }
+});
+
+// ============================================================================
+// BULK ACTIONS
+// ============================================================================
+
+class BulkActionsManager {
+    constructor(tableSelector = 'table') {
+        this.table = document.querySelector(tableSelector);
+        this.selectedIds = new Set();
+        this.init();
+    }
+
+    init() {
+        if (!this.table) return;
+
+        // Add checkboxes to header and rows
+        this.addCheckboxes();
+        this.attachListeners();
+    }
+
+    addCheckboxes() {
+        const header = this.table.querySelector('thead');
+        if (!header) return;
+
+        // Add master checkbox to header
+        const masterCheckbox = document.createElement('th');
+        masterCheckbox.innerHTML = '<input type="checkbox" class="form-check-input master-checkbox">';
+        header.querySelector('tr').insertBefore(masterCheckbox, header.querySelector('tr').firstChild);
+
+        // Add checkboxes to rows
+        this.table.querySelectorAll('tbody tr').forEach(row => {
+            const checkbox = document.createElement('td');
+            checkbox.innerHTML = '<input type="checkbox" class="form-check-input row-checkbox">';
+            row.insertBefore(checkbox, row.firstChild);
+        });
+    }
+
+    attachListeners() {
+        const masterCheckbox = this.table.querySelector('.master-checkbox');
+        const rowCheckboxes = this.table.querySelectorAll('.row-checkbox');
+
+        if (masterCheckbox) {
+            masterCheckbox.addEventListener('change', (e) => {
+                rowCheckboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                    this.updateSelectedIds();
+                });
+            });
+        }
+
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                this.updateSelectedIds();
+            });
+        });
+    }
+
+    updateSelectedIds() {
+        this.selectedIds.clear();
+        this.table.querySelectorAll('tbody .row-checkbox:checked').forEach(cb => {
+            const row = cb.closest('tr');
+            const id = row.dataset.id || row.querySelector('[data-id]')?.dataset.id;
+            if (id) this.selectedIds.add(id);
+        });
+
+        this.updateBulkActionsBar();
+    }
+
+    updateBulkActionsBar() {
+        let bar = document.querySelector('.bulk-actions-bar');
+        
+        if (this.selectedIds.size > 0) {
+            if (!bar) {
+                bar = document.createElement('div');
+                bar.className = 'bulk-actions-bar';
+                bar.innerHTML = `
+                    <div class="bulk-actions-info">
+                        <span class="count">${this.selectedIds.size} selected</span>
+                    </div>
+                    <div class="bulk-actions-buttons">
+                        <button class="btn btn-danger btn-sm" onclick="location.reload()">Delete Selected</button>
+                    </div>
+                `;
+                this.table.parentElement.insertBefore(bar, this.table);
+            } else {
+                bar.querySelector('.count').textContent = `${this.selectedIds.size} selected`;
+            }
+        } else if (bar) {
+            bar.remove();
+        }
+    }
+
+    getSelected() {
+        return Array.from(this.selectedIds);
+    }
+}
+
+window.BulkActionsManager = BulkActionsManager;
+
+// ============================================================================
+// ENHANCED INITIALIZATION
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    const isLoginPage = document.body.classList.contains('login-page') || 
+                       window.location.pathname.includes('admin/login.php') ||
+                       document.querySelector('.login-container') !== null;
+    
+    if (!isLoginPage) {
+        // Enhanced initialization
+        const themeManager = new ThemeManager();
+        const sidebarManager = new SidebarManager();
+        
+        // Add keyboard shortcuts hint to buttons if needed
+        document.querySelectorAll('form button[type="submit"]').forEach(btn => {
+            if (!btn.querySelector('.keyboard-hint')) {
+                const hint = document.createElement('span');
+                hint.className = 'keyboard-hint';
+                hint.textContent = 'Ctrl+S';
+                btn.appendChild(hint);
+            }
+        });
+    }
+});
