@@ -234,8 +234,7 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                             <button class="btn btn-sm <?php echo $item['active'] ? 'btn-warning' : 'btn-success'; ?>" onclick="toggleMenuItemVisibility(<?php echo $item['id']; ?>, <?php echo $item['active']; ?>)" title="<?php echo $item['active'] ? 'Hide menu item' : 'Show menu item'; ?>">
                                                 <i class="fas <?php echo $item['active'] ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" 
-                                                    data-bs-target="#editModal<?php echo $item['id']; ?>">
+                                            <button class="btn btn-sm btn-warning edit-menu-btn" data-menu-id="<?php echo $item['id']; ?>" data-label="<?php echo htmlspecialchars($item['label']); ?>" data-url="<?php echo htmlspecialchars($item['url']); ?>" data-position="<?php echo $item['position']; ?>" data-active="<?php echo $item['active']; ?>">
                                                 <i class="fas fa-edit"></i> Edit
                                             </button>
                                             <form method="POST" style="display: inline;">
@@ -249,57 +248,57 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Edit Modal -->
-                                <div class="modal fade" id="editModal<?php echo $item['id']; ?>" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Edit Menu Item</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form method="POST">
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="action" value="edit">
-                                                    <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
-                                                    
-                                                    <div class="mb-3">
-                                                        <label for="edit_label<?php echo $item['id']; ?>" class="form-label">Label</label>
-                                                        <input type="text" class="form-control" id="edit_label<?php echo $item['id']; ?>" 
-                                                               name="label" value="<?php echo htmlspecialchars($item['label']); ?>" required>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label for="edit_url<?php echo $item['id']; ?>" class="form-label">URL</label>
-                                                        <input type="text" class="form-control" id="edit_url<?php echo $item['id']; ?>" 
-                                                               name="url" value="<?php echo htmlspecialchars($item['url']); ?>" required>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label for="edit_position<?php echo $item['id']; ?>" class="form-label">Position</label>
-                                                        <input type="number" class="form-control" id="edit_position<?php echo $item['id']; ?>" 
-                                                               name="position" value="<?php echo $item['position']; ?>">
-                                                    </div>
-                                                    
-                                                    <div class="mb-3 form-check">
-                                                        <input type="checkbox" class="form-check-input" id="edit_active<?php echo $item['id']; ?>" 
-                                                               name="active" <?php echo $item['active'] ? 'checked' : ''; ?>>
-                                                        <label class="form-check-label" for="edit_active<?php echo $item['id']; ?>">
-                                                            Active
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Edit Modal (Outside sortable container) -->
+            <div class="modal fade" id="editMenuModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Menu Item</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="POST">
+                            <div class="modal-body">
+                                <input type="hidden" name="action" value="edit">
+                                <input type="hidden" name="id" id="edit_menu_id" value="">
+                                
+                                <div class="mb-3">
+                                    <label for="edit_menu_label" class="form-label">Label</label>
+                                    <input type="text" class="form-control" id="edit_menu_label" 
+                                           name="label" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="edit_menu_url" class="form-label">URL</label>
+                                    <input type="text" class="form-control" id="edit_menu_url" 
+                                           name="url" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="edit_menu_position" class="form-label">Position</label>
+                                    <input type="number" class="form-control" id="edit_menu_position" 
+                                           name="position">
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="edit_menu_active" 
+                                           name="active">
+                                    <label class="form-check-label" for="edit_menu_active">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -324,6 +323,28 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
             }
         });
     }
+    
+    // Handle edit button clicks
+    document.querySelectorAll('.edit-menu-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const menuId = this.getAttribute('data-menu-id');
+            const label = this.getAttribute('data-label');
+            const url = this.getAttribute('data-url');
+            const position = this.getAttribute('data-position');
+            const active = this.getAttribute('data-active');
+            
+            // Populate modal with data
+            document.getElementById('edit_menu_id').value = menuId;
+            document.getElementById('edit_menu_label').value = label;
+            document.getElementById('edit_menu_url').value = url;
+            document.getElementById('edit_menu_position').value = position;
+            document.getElementById('edit_menu_active').checked = active == 1;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editMenuModal'));
+            modal.show();
+        });
+    });
     
     // Toggle menu item visibility
     function toggleMenuItemVisibility(menuId, isActive) {
