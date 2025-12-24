@@ -1,28 +1,28 @@
 /**
  * ALT HEAUX - Professional Admin Dashboard
- * Dark Gray Theme
+ * Dark Navy Blue & Gray Theme
  */
 
 :root {
-    /* Primary Colors */
-    --primary-dark: #1a1a1a;
-    --primary-medium: #2d2d2d;
-    --primary-light: #3a3a3a;
+    /* Primary Colors - Navy Blues & Grays */
+    --primary-dark: #0f1419;        /* Very dark navy */
+    --primary-medium: #1a2332;      /* Dark navy blue */
+    --primary-light: #2d3e52;       /* Medium navy blue */
     
-    /* Accent Colors */
-    --accent-gold: #c9a961;
-    --accent-blue: #4a90e2;
-    --accent-green: #2ecc71;
-    --accent-red: #e74c3c;
-    --accent-orange: #f39c12;
+    /* Accent Colors - Professional palette */
+    --accent-gold: #64b5f6;         /* Light blue accent */
+    --accent-blue: #42a5f5;         /* Medium blue accent */
+    --accent-green: #4caf50;        /* Green for success */
+    --accent-red: #ef5350;          /* Red for errors */
+    --accent-orange: #ffa726;       /* Orange for warnings */
     
-    /* Neutral Colors */
-    --text-primary: #ffffff;
-    --text-secondary: #b0b0b0;
-    --text-muted: #808080;
-    --border-color: #404040;
-    --bg-dark: #151515;
-    --bg-lighter: #454545;
+    /* Neutral Colors - Grays & White */
+    --text-primary: #ffffff;        /* Pure white text */
+    --text-secondary: #b0bac6;      /* Light gray text */
+    --text-muted: #717680;          /* Medium gray text */
+    --border-color: #3a4a5c;        /* Navy-gray borders */
+    --bg-dark: #0a0f15;             /* Very dark background */
+    --bg-lighter: #3d4f63;          /* Lighter gray-blue */
 }
 
 /* ============================================================================
@@ -69,7 +69,7 @@ body {
 .sidebar .sidebar-header h5 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--accent-gold);
+    color: var(--accent-blue);
     margin: 0 0 0.5rem 0;
     letter-spacing: 0.5px;
 }
@@ -118,25 +118,25 @@ body {
 }
 
 .sidebar .nav-link:hover {
-    background-color: rgba(201, 169, 97, 0.1);
-    color: var(--accent-gold);
-    border-left-color: var(--accent-gold);
+    background-color: rgba(66, 165, 245, 0.1);
+    color: var(--accent-blue);
+    border-left-color: var(--accent-blue);
     padding-left: 1.65rem;
 }
 
 .sidebar .nav-link:hover i {
-    color: var(--accent-gold);
+    color: var(--accent-blue);
 }
 
 .sidebar .nav-link.active {
-    background-color: rgba(201, 169, 97, 0.15);
-    color: var(--accent-gold);
-    border-left: 4px solid var(--accent-gold);
+    background-color: rgba(66, 165, 245, 0.15);
+    color: var(--accent-blue);
+    border-left: 4px solid var(--accent-blue);
     font-weight: 600;
 }
 
 .sidebar .nav-link.active i {
-    color: var(--accent-gold);
+    color: var(--accent-blue);
 }
 
 /* Logout button */
@@ -214,17 +214,17 @@ body {
 }
 
 .card:hover {
-    border-color: var(--accent-gold);
-    box-shadow: 0 16px 32px rgba(201, 169, 97, 0.25);
+    border-color: var(--accent-blue);
+    box-shadow: 0 16px 32px rgba(66, 165, 245, 0.25);
     transform: translateY(-4px);
 }
 
 .card-header {
     background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-medium) 100%);
-    border-bottom: 2px solid var(--accent-gold);
+    border-bottom: 2px solid var(--accent-blue);
     padding: 1.5rem;
     font-weight: 700;
-    color: var(--accent-gold);
+    color: var(--accent-blue);
     display: flex;
     align-items: center;
     font-size: 1.1rem;
@@ -257,14 +257,14 @@ body {
     border: 2px solid var(--border-color);
     border-radius: 10px;
     padding: 1.75rem;
-    border-left: 5px solid var(--accent-gold);
+    border-left: 5px solid var(--accent-blue);
     transition: all 0.3s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 12px 24px rgba(201, 169, 97, 0.25);
-    border-color: var(--accent-gold);
+    box-shadow: 0 12px 24px rgba(66, 165, 245, 0.25);
+    border-color: var(--accent-blue);
 }
 
 .stat-card h6 {
@@ -279,7 +279,7 @@ body {
 .stat-card h3 {
     font-weight: 800;
     margin: 0.75rem 0;
-    color: var(--accent-gold);
+    color: var(--accent-blue);
     font-size: 2.2rem;
     line-height: 1.2;
 }
@@ -360,9 +360,9 @@ textarea.form-control {
 .form-select:focus,
 textarea.form-control:focus {
     background-color: var(--primary-light);
-    border-color: var(--accent-gold);
+    border-color: var(--accent-blue);
     color: var(--text-primary);
-    box-shadow: 0 0 0 0.3rem rgba(201, 169, 97, 0.25);
+    box-shadow: 0 0 0 0.3rem rgba(66, 165, 245, 0.25);
     outline: none;
 }
 
@@ -404,18 +404,18 @@ textarea.form-control:focus {
 
 /* Primary Button */
 .btn-primary {
-    background-color: var(--accent-gold);
-    color: var(--primary-dark);
-    border-color: var(--accent-gold);
-    box-shadow: 0 4px 8px rgba(201, 169, 97, 0.3);
+    background-color: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 8px rgba(66, 165, 245, 0.3);
 }
 
 .btn-primary:hover {
-    background-color: #dbb86c;
-    border-color: #dbb86c;
+    background-color: #1e88e5;
+    border-color: #1e88e5;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(201, 169, 97, 0.4);
-    color: var(--primary-dark);
+    box-shadow: 0 6px 16px rgba(66, 165, 245, 0.4);
+    color: white;
 }
 
 .btn-primary:active {
@@ -426,13 +426,13 @@ textarea.form-control:focus {
 .btn-secondary {
     background-color: var(--primary-light);
     color: var(--text-primary);
-    border-color: var(--accent-gold);
+    border-color: var(--accent-blue);
 }
 
 .btn-secondary:hover {
-    background-color: rgba(201, 169, 97, 0.15);
-    border-color: var(--accent-gold);
-    color: var(--accent-gold);
+    background-color: rgba(66, 165, 245, 0.15);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
     transform: translateY(-2px);
 }
 
@@ -486,17 +486,17 @@ textarea.form-control:focus {
 
 /* Outline Buttons */
 .btn-outline-primary {
-    color: var(--accent-gold);
-    border-color: var(--accent-gold);
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
     background-color: transparent;
 }
 
 .btn-outline-primary:hover {
-    background-color: rgba(201, 169, 97, 0.1);
-    color: #dbb86c;
-    border-color: #dbb86c;
+    background-color: rgba(66, 165, 245, 0.1);
+    color: #1e88e5;
+    border-color: #1e88e5;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(201, 169, 97, 0.2);
+    box-shadow: 0 4px 8px rgba(66, 165, 245, 0.2);
 }
 
 .btn-outline-secondary {
@@ -569,7 +569,7 @@ textarea.form-control:focus {
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(201, 169, 97, 0.08);
+    background-color: rgba(66, 165, 245, 0.08);
 }
 
 /* ============================================================================
@@ -589,7 +589,7 @@ textarea.form-control:focus {
 }
 
 .modal-header .modal-title {
-    color: var(--accent-gold);
+    color: var(--accent-blue);
     font-weight: 600;
     font-size: 1.25rem;
 }
@@ -642,9 +642,9 @@ textarea.form-control:focus {
 }
 
 .alert-info {
-    background-color: rgba(74, 144, 226, 0.1);
+    background-color: rgba(66, 165, 245, 0.1);
     border-color: var(--accent-blue);
-    color: #4a90e2;
+    color: #42a5f5;
 }
 
 .badge {
@@ -683,8 +683,8 @@ textarea.form-control:focus {
 }
 
 .badge.bg-primary {
-    background-color: var(--accent-gold) !important;
-    color: var(--primary-dark);
+    background-color: var(--accent-blue) !important;
+    color: white;
 }
 
 /* Icon styling */
@@ -696,13 +696,13 @@ textarea.form-control:focus {
     height: 40px;
     border-radius: 6px;
     background-color: var(--primary-light);
-    color: var(--accent-gold);
+    color: var(--accent-blue);
     font-size: 1.25rem;
 }
 
 .page-header i {
     font-size: 1.75rem;
-    color: var(--accent-gold);
+    color: var(--accent-blue);
     margin-right: 0.75rem;
 }
 
@@ -737,7 +737,7 @@ textarea.form-control:focus {
 }
 
 .icon-gold {
-    color: var(--accent-gold);
+    color: var(--accent-blue);
 }
 
 /* ============================================================================
@@ -802,7 +802,7 @@ textarea.form-control:focus {
 }
 
 .section-item:hover {
-    border-color: var(--accent-gold);
+    border-color: var(--accent-blue);
     background-color: var(--primary-medium);
 }
 
@@ -816,8 +816,8 @@ textarea.form-control:focus {
 }
 
 .slider-item:hover {
-    border-color: var(--accent-gold);
-    box-shadow: 0 4px 12px rgba(201, 169, 97, 0.15);
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(66, 165, 245, 0.15);
 }
 
 .slider-item img {
@@ -840,8 +840,8 @@ textarea.form-control:focus {
    ============================================================================ */
 
 .spinner-border {
-    border-color: rgba(201, 169, 97, 0.2);
-    border-right-color: var(--accent-gold);
+    border-color: rgba(66, 165, 245, 0.2);
+    border-right-color: var(--accent-blue);
 }
 
 .progress {
@@ -851,7 +851,7 @@ textarea.form-control:focus {
 }
 
 .progress-bar {
-    background: linear-gradient(90deg, var(--accent-gold) 0%, var(--accent-blue) 100%);
+    background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
 }
 
 /* ============================================================================
