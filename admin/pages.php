@@ -108,131 +108,14 @@ $templates = getAllPageTemplates();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Builder - Admin Panel</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
-    <style>
-        .page-builder-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 1.5rem;
-        }
-
-        .page-builder-canvas {
-            background-color: var(--primary-light);
-            border-radius: 8px;
-            padding: 2rem;
-            min-height: 600px;
-            border: 2px dashed var(--border-color);
-        }
-
-        .builder-block {
-            background-color: var(--primary-medium);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            cursor: move;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .builder-block:hover {
-            border-color: var(--accent-gold);
-            box-shadow: 0 4px 12px rgba(201, 169, 97, 0.2);
-        }
-
-        .builder-block.sortable-ghost {
-            opacity: 0.5;
-            background-color: var(--accent-gold);
-        }
-
-        .builder-block-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .builder-block-type {
-            font-weight: 600;
-            color: var(--accent-gold);
-            font-size: 0.9rem;
-        }
-
-        .builder-block-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .builder-block-actions button {
-            padding: 0.3rem 0.6rem;
-            font-size: 0.8rem;
-        }
-
-        .blocks-panel {
-            background-color: var(--primary-medium);
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .blocks-panel h6 {
-            color: var(--accent-gold);
-            margin-bottom: 1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-
-        .block-template {
-            background-color: var(--primary-light);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            cursor: grab;
-            transition: all 0.2s ease;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .block-template:hover {
-            border-color: var(--accent-gold);
-            background-color: rgba(201, 169, 97, 0.1);
-        }
-
-        .block-template i {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 1.2rem;
-        }
-
-        .builder-preview {
-            background-color: white;
-            border-radius: 8px;
-            padding: 2rem;
-            color: #333;
-            min-height: 400px;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 1200px) {
-            .page-builder-wrapper {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
+    <div class="wrapper">
         <?php include('_sidebar.php'); ?>
-        
-        <div class="col-md-9 main-content">
+        <div class="main-content">
             <div class="page-header-extended">
                 <h1><i class="fas fa-file-alt"></i> Page Builder</h1>
                 <p class="page-header-subtitle">Create and manage pages with drag-and-drop builder</p>
@@ -256,7 +139,7 @@ $templates = getAllPageTemplates();
             <?php if (!$page): ?>
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="fas fa-plus"></i> Create New Page
+                        <h5 class="mb-0"><i class="bi bi-plus"></i> Create New Page</h5>
                     </div>
                     <div class="card-body">
                         <form method="POST" class="row g-3">
@@ -284,7 +167,7 @@ $templates = getAllPageTemplates();
                 <!-- Pages List -->
                 <div class="card">
                     <div class="card-header">
-                        <i class="fas fa-list"></i> All Pages
+                        <h5 class="mb-0"><i class="bi bi-list"></i> All Pages</h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($all_pages)): ?>
@@ -358,7 +241,7 @@ $templates = getAllPageTemplates();
                 <!-- Page Settings -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <i class="fas fa-cog"></i> Page Settings
+                        <h5 class="mb-0"><i class="bi bi-gear"></i> Page Settings</h5>
                     </div>
                     <div class="card-body">
                         <form id="pageSettingsForm" method="POST">
@@ -422,7 +305,7 @@ $templates = getAllPageTemplates();
                 <!-- Page Builder -->
                 <div class="card">
                     <div class="card-header">
-                        <i class="fas fa-cube"></i> Page Content Builder
+                        <h5 class="mb-0"><i class="bi bi-box"></i> Page Content Builder</h5>
                     </div>
                     <div class="card-body">
                         <div class="page-builder-wrapper">
@@ -494,7 +377,6 @@ $templates = getAllPageTemplates();
 
             <?php endif; ?>
         </div>
-    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

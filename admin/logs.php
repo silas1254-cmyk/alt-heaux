@@ -4,8 +4,8 @@
  * View all admin actions for auditing and troubleshooting
  */
 
-require '../../includes/config.php';
-require '../../includes/backup_helper.php';
+require_once '../includes/config.php';
+require_once '../includes/backup_helper.php';
 
 // Check if admin has permission to view logs
 if (!isAdminLoggedIn()) {
@@ -21,7 +21,7 @@ $filter_action = $_GET['action'] ?? '';
 $filter_date = $_GET['date'] ?? '';
 
 // Build query
-$query = "SELECT l.*, a.username FROM admin_logs l LEFT JOIN admins a ON l.admin_id = a.id WHERE 1=1";
+$query = "SELECT l.*, a.username FROM admin_logs l LEFT JOIN admin_users a ON l.admin_id = a.id WHERE 1=1";
 $params = [];
 $param_types = '';
 
@@ -54,14 +54,14 @@ $stmt->execute();
 $logs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
 // Get unique admins for filter
-$admins_result = $conn->query("SELECT id, username FROM admins ORDER BY username");
+$admins_result = $conn->query("SELECT id, username FROM admin_users ORDER BY username");
 $admins = $admins_result->fetch_all(MYSQLI_ASSOC);
 
 // Get unique actions for filter
 $actions_result = $conn->query("SELECT DISTINCT action FROM admin_logs ORDER BY action");
 $actions = $actions_result->fetch_all(MYSQLI_ASSOC);
 
-require '../../includes/header.php';
+require '../includes/header.php';
 ?>
 
 <div class="container-fluid py-4">
@@ -263,4 +263,4 @@ function exportCSV() {
 }
 </script>
 
-<?php require '../../includes/footer.php'; ?>
+<?php require '../includes/footer.php'; ?>

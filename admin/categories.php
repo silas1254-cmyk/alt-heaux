@@ -101,21 +101,22 @@ if (isset($_GET['edit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Categories - <?php echo SITE_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <?php include('_sidebar.php'); ?>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <?php include('_sidebar.php'); ?>
 
-            <!-- Main Content -->
-            <div class="col-md-9 main-content">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <div>
                     <h1>Manage Categories</h1>
-                    <a href="<?php echo SITE_URL; ?>admin/dashboard.php" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back</a>
                 </div>
+                <a href="<?php echo SITE_URL; ?>admin/dashboard.php" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+            </div>
 
                 <?php if ($message): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -133,7 +134,7 @@ if (isset($_GET['edit'])) {
 
                 <!-- Category Form -->
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header">
                         <h5 class="mb-0"><?php echo $edit_category ? 'Edit Category' : 'Create New Category'; ?></h5>
                     </div>
                     <div class="card-body">
@@ -180,8 +181,8 @@ if (isset($_GET['edit'])) {
 
                 <!-- Categories List -->
                 <div class="card">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0"><i class="fas fa-arrows-alt"></i> All Categories (<?php echo count($categories); ?>) - Drag to reorder</h5>
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-arrows-alt"></i> All Categories (<?php echo count($categories); ?>) - Drag to reorder</h5>
                     </div>
                     <div class="card-body">
                         <?php if (empty($categories)): ?>
@@ -189,11 +190,11 @@ if (isset($_GET['edit'])) {
                         <?php else: ?>
                             <div id="sortable-categories" class="list-group">
                                 <?php foreach ($categories as $cat): ?>
-                                    <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-category-id="<?php echo $cat['id']; ?>" style="cursor: grab; background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 15px; border-radius: 6px;">
+                                    <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-category-id="<?php echo $cat['id']; ?>" style="cursor: grab; background: var(--dark-1); color: var(--text-primary); border: 1px solid var(--border); margin-bottom: 8px; padding: 15px; border-radius: 6px;">
                                         <div class="d-flex align-items-center flex-grow-1">
-                                            <i class="fas fa-grip-vertical me-3" style="cursor: grab; color: var(--text-secondary);"></i>
+                                            <i class="bi bi-grip-vertical category-drag-handle me-3" style="cursor: grab; color: var(--text-secondary);"></i>
                                             <div>
-                                                <strong style="color: var(--text-primary);"><?php echo htmlspecialchars($cat['name']); ?></strong>
+                                                <strong style="color: var(--text-secondary); font-weight: 600;"><?php echo htmlspecialchars($cat['name']); ?></strong>
                                                 <?php if (!empty($cat['description'])): ?>
                                                 <br>
                                                 <small style="color: var(--text-muted);"><?php echo htmlspecialchars($cat['description']); ?></small>
@@ -205,13 +206,13 @@ if (isset($_GET['edit'])) {
                                                 <?php echo ucfirst($cat['status']); ?>
                                             </span>
                                             <a href="?edit=<?php echo $cat['id']; ?>" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i> Edit
+                                                <i class="bi bi-pencil"></i> Edit
                                             </a>
                                             <form method="POST" style="display: inline;" class="delete-form">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="category_id" value="<?php echo $cat['id']; ?>">
                                                 <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-id="<?php echo $cat['id']; ?>">
-                                                    <i class="fas fa-trash"></i> Delete
+                                                    <i class="bi bi-trash"></i> Delete
                                                 </button>
                                             </form>
                                         </div>
@@ -235,7 +236,7 @@ if (isset($_GET['edit'])) {
         if (sortableContainer) {
             const sortable = Sortable.create(sortableContainer, {
                 animation: 150,
-                handle: '.fa-grip-vertical',
+                handle: '.category-drag-handle',
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
                 onEnd: function(evt) {

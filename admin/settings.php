@@ -98,94 +98,29 @@ $settings = getAllDbSettings($conn) ?? [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site Settings - Admin Panel</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
-    <style>
-        .page-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .page-header h2 {
-            margin-bottom: 0.5rem;
-        }
-        
-        .tab-content {
-            animation: fadeIn 0.3s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .list-group-item {
-            border-left: 3px solid transparent;
-            margin-bottom: 0.25rem;
-            transition: all 0.2s ease;
-        }
-        
-        .list-group-item:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .list-group-item.active {
-            border-left-color: #667eea;
-            background-color: #f8f9fa;
-        }
-        
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            margin-bottom: 1.5rem;
-        }
-        
-        .card-header {
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .form-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-        
-        .form-text {
-            display: block;
-            margin-top: 0.25rem;
-            font-size: 0.875rem;
-        }
-        
-        .form-control-color {
-            height: calc(1.5em + 0.75rem + 2px);
-        }
-        
-        .input-group .form-control-color {
-            max-width: 60px;
-        }
-    </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <?php include('_sidebar.php'); ?>
-        
-        <div class="col-md-9 main-content" style="padding: 2rem;">
-            <div class="page-header">
-                <h2><i class="fas fa-cog"></i> Site Settings</h2>
-                <p class="text-muted">Configure site-wide settings, branding, and options</p>
-            </div>
+<div class="wrapper">
+    <?php include('_sidebar.php'); ?>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-gear"></i> Site Settings</h1>
+            <small>Configure site-wide settings, branding, and options</small>
+        </div>
 
             <?php if ($message): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($message); ?>
+                    <i class="bi bi-check-circle"></i> <?php echo htmlspecialchars($message); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
 
             <?php if ($error): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+                    <i class="bi bi-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
@@ -193,15 +128,15 @@ $settings = getAllDbSettings($conn) ?? [];
             <div class="row">
                 <!-- SETTINGS TABS -->
                 <div class="col-md-3 mb-3">
-                    <div class="list-group sticky-top" style="background-color: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px;">
-                        <button type="button" class="list-group-item list-group-item-action active tab-btn" onclick="showTab('site', event)" style="background-color: #3a3a3a; border: none; color: #e8e8e8; padding: 1rem;">
-                            <i class="fas fa-globe"></i> Site Settings
+                    <div class="list-group sticky-top" style="background-color: var(--dark-2); border: 1px solid var(--border); border-radius: 8px;">
+                        <button type="button" class="list-group-item list-group-item-action active tab-btn" onclick="showTab('site', event)" style="background-color: var(--dark-3); border: none; color: var(--text-primary); padding: 1rem;">
+                            <i class="bi bi-globe"></i> Site Settings
                         </button>
-                        <button type="button" class="list-group-item list-group-item-action tab-btn" onclick="showTab('store', event)" style="background-color: #2a2a2a; border: none; color: #b0b0b0; padding: 1rem; border-top: 1px solid #3a3a3a; transition: all 0.3s ease;">
-                            <i class="fas fa-store"></i> Store Settings
+                        <button type="button" class="list-group-item list-group-item-action tab-btn" onclick="showTab('store', event)" style="background-color: var(--dark-2); border: none; color: var(--text-secondary); padding: 1rem; border-top: 1px solid var(--border); transition: all 0.3s ease;">
+                            <i class="bi bi-shop"></i> Store Settings
                         </button>
-                        <button type="button" class="list-group-item list-group-item-action tab-btn" onclick="showTab('email', event)" style="background-color: #2a2a2a; border: none; color: #b0b0b0; padding: 1rem; border-top: 1px solid #3a3a3a; transition: all 0.3s ease;">
-                            <i class="fas fa-envelope"></i> Email Settings
+                        <button type="button" class="list-group-item list-group-item-action tab-btn" onclick="showTab('email', event)" style="background-color: var(--dark-2); border: none; color: var(--text-secondary); padding: 1rem; border-top: 1px solid var(--border); transition: all 0.3s ease;">
+                            <i class="bi bi-envelope"></i> Email Settings
                         </button>
                     </div>
                 </div>
@@ -211,8 +146,8 @@ $settings = getAllDbSettings($conn) ?? [];
                     <!-- SITE SETTINGS -->
                     <div id="site" class="tab-content">
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0"><i class="fas fa-globe"></i> Site Settings</h5>
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-globe"></i> Site Settings</h5>
                             </div>
                             <form method="POST">
                                 <input type="hidden" name="section" value="site">
@@ -242,7 +177,7 @@ $settings = getAllDbSettings($conn) ?? [];
                                 </div>
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save"></i> Save Settings
+                                        <i class="bi bi-download"></i> Save Settings
                                     </button>
                                 </div>
                             </form>
@@ -252,8 +187,8 @@ $settings = getAllDbSettings($conn) ?? [];
                     <!-- STORE SETTINGS -->
                     <div id="store" class="tab-content" style="display: none;">
                         <div class="card">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0"><i class="fas fa-store"></i> Store Settings</h5>
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-shop"></i> Store Settings</h5>
                             </div>
                             <form method="POST">
                                 <input type="hidden" name="section" value="store">
@@ -301,8 +236,8 @@ $settings = getAllDbSettings($conn) ?? [];
                     <!-- EMAIL SETTINGS -->
                     <div id="email" class="tab-content" style="display: none;">
                         <div class="card">
-                            <div class="card-header bg-info text-white">
-                                <h5 class="mb-0"><i class="fas fa-envelope"></i> Email Configuration</h5>
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-envelope"></i> Email Configuration</h5>
                             </div>
                             <form method="POST">
                                 <input type="hidden" name="section" value="email">

@@ -103,7 +103,7 @@ $chart_data_json = json_encode($chart_data);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Dashboard - <?php echo SITE_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
 </head>
@@ -169,7 +169,7 @@ $chart_data_json = json_encode($chart_data);
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0">
-                                    <i class="fas fa-chart-bar"></i> 
+                                    <i class="bi bi-bar-chart"></i> 
                                     <?php 
                                         $titles = [
                                             'day' => 'Daily Revenue (Last 30 Days)',

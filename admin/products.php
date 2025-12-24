@@ -363,299 +363,34 @@ if (isset($_GET['edit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Management - Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin_file_manager.css">
-    <style>
-        .image-thumbnail {
-            position: relative;
-            display: inline-block;
-            margin: 5px;
-        }
-        
-        .image-thumbnail img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 2px solid transparent;
-            cursor: pointer;
-        }
-        
-        .image-thumbnail.primary img {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 10px rgba(201, 169, 97, 0.5);
-        }
-        
-        .image-thumbnail .badge-primary {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: var(--accent-gold);
-        }
-        
-        .image-actions {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            right: 5px;
-            display: none;
-            gap: 5px;
-        }
-        
-        .image-thumbnail:hover .image-actions {
-            display: flex;
-        }
-        
-        .image-actions .btn {
-            flex: 1;
-            padding: 4px 6px;
-            font-size: 0.75rem;
-        }
-        
-        .color-preview {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-            border: 1px solid #ccc;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        
-        .variant-item {
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Dark Theme Styling */
-        body {
-            background: #1a1a1a;
-            color: #e0e0e0;
-        }
-
-        .container-fluid {
-            background: #1a1a1a;
-        }
-
-        .main-content {
-            background: #1a1a1a;
-        }
-
-        .page-header {
-            color: #e0e0e0;
-            padding: 20px 0;
-            border-bottom: 1px solid #444;
-            margin-bottom: 20px;
-        }
-
-        .page-header h1 {
-            color: #fff;
-        }
-
-        .card {
-            background: #2a2a2a;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .card-header {
-            background: #1f1f1f;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .card-header h5 {
-            color: #fff;
-        }
-
-        .form-control, .form-select {
-            background: #333;
-            border-color: #555;
-            color: #e0e0e0;
-        }
-
-        .form-control:focus, .form-select:focus {
-            background: #333;
-            border-color: #0d6efd;
-            color: #e0e0e0;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-
-        .form-label {
-            color: #e0e0e0;
-        }
-
-        .alert {
-            border-color: #555;
-        }
-
-        .alert-success {
-            background: #1e4620;
-            border-color: #51cf66;
-            color: #51cf66;
-        }
-
-        .alert-danger {
-            background: #4a1f1f;
-            border-color: #ff6b6b;
-            color: #ff6b6b;
-        }
-
-        .btn-primary {
-            background: #0d6efd;
-            border-color: #0d6efd;
-        }
-
-        .btn-primary:hover {
-            background: #0b5ed7;
-            border-color: #0b5ed7;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            border-color: #6c757d;
-            color: #fff;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            border-color: #5a6268;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-            border-color: #c82333;
-        }
-
-        .badge {
-            background: #444;
-            color: #fff;
-        }
-
-        .badge.bg-secondary {
-            background: #5a5a5a !important;
-        }
-
-        .badge.bg-info {
-            background: #0d6efd !important;
-            color: #fff;
-        }
-
-        .badge.bg-warning {
-            background: #ffc107 !important;
-            color: #000;
-        }
-
-        .badge.bg-danger {
-            background: #dc3545 !important;
-            color: #fff;
-        }
-
-        .badge.bg-success {
-            background: #198754 !important;
-            color: #fff;
-        }
-
-        .modal-content {
-            background: #2a2a2a;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .modal-header {
-            background: #1f1f1f;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .modal-header .btn-close {
-            filter: invert(1);
-        }
-
-        .modal-title {
-            color: #fff;
-        }
-
-        .list-group {
-            background: transparent;
-        }
-
-        .list-group-item {
-            background: #2a2a2a;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .variant-item {
-            background-color: #333;
-            color: #e0e0e0;
-        }
-
-        table.table {
-            color: #e0e0e0;
-            border-color: #444;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #333;
-            color: #e0e0e0;
-        }
-
-        .table thead {
-            border-color: #444;
-        }
-
-        .table-secondary {
-            background-color: #1f1f1f;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        .text-muted {
-            color: #a0a0a0 !important;
-        }
-
-        small {
-            color: #a0a0a0;
-        }
-    </style>
 </head>
-<body class="bg-dark text-light">
-    <div class="container-fluid">
-        <div class="row g-0">
-            <!-- Sidebar -->
-            <?php include('_sidebar.php'); ?>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <?php include('_sidebar.php'); ?>
 
-            <!-- Main Content -->
-            <div class="col-md-9 main-content">
-                <div class="page-header">
-                    <h1><i class="fas fa-box"></i> Product Management</h1>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1><i class="bi bi-box"></i> Product Management</h1>
+            </div>
+
+            <?php if ($success): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ✓ <?php echo $success; ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
+            <?php endif; ?>
 
-                <?php if ($success): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i> <?php echo $success; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($error): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> <?php echo $error; ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
+            <?php if ($error): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ✗ <?php echo $error; ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
 
                 <!-- If editing a product, show detailed edit panel -->
                 <?php if ($edit_product): ?>
@@ -670,63 +405,88 @@ if (isset($_GET['edit'])) {
                         <div class="col-lg-8">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Product Information</h5>
+                                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Product Information</h5>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST">
                                         <input type="hidden" name="action" value="edit">
                                         <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
 
-                                        <div class="mb-3">
-                                            <label for="name" class="form-label">Product Name *</label>
-                                            <input type="text" class="form-control" id="name" name="name" required value="<?php echo htmlspecialchars($edit_product['name']); ?>">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="description" class="form-label">Description</label>
-                                            <textarea class="form-control" id="description" name="description" rows="3"><?php echo htmlspecialchars($edit_product['description'] ?? ''); ?></textarea>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="price" class="form-label">Price *</label>
-                                                <input type="number" class="form-control" id="price" name="price" step="0.01" required value="<?php echo $edit_product['price']; ?>">
+                                        <!-- Basic Information -->
+                                        <div class="form-section mb-4">
+                                            <h6 class="text-secondary font-weight-bold mb-3">
+                                                <i class="bi bi-file-text"></i> Basic Information
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label for="name" class="form-label"><i class="bi bi-tag"></i> Product Name *</label>
+                                                <input type="text" class="form-control" id="name" name="name" required value="<?php echo htmlspecialchars($edit_product['name']); ?>">
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="quantity" class="form-label">Quantity</label>
-                                                <input type="number" class="form-control" id="quantity" name="quantity" value="<?php echo $edit_product['quantity']; ?>">
+
+                                            <div class="mb-3">
+                                                <label for="description" class="form-label"><i class="bi bi-pencil-square"></i> Description</label>
+                                                <textarea class="form-control" id="description" name="description" rows="4" placeholder="Enter a detailed product description..."><?php echo htmlspecialchars($edit_product['description'] ?? ''); ?></textarea>
                                             </div>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label for="category" class="form-label">Category</label>
-                                            <select class="form-control" id="category" name="category">
-                                                <option value="">Select Category</option>
-                                                <?php foreach ($all_categories as $cat): ?>
-                                                    <option value="<?php echo $cat['id']; ?>" <?php echo ($edit_product['category_id'] == $cat['id']) ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($cat['name']); ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            </select>
+                                        <hr class="my-4" style="border-color: rgba(66, 165, 245, 0.2);">
+
+                                        <!-- Pricing & Inventory -->
+                                        <div class="form-section mb-4">
+                                            <h6 class="text-secondary font-weight-bold mb-3">
+                                                <i class="bi bi-cash-coin"></i> Pricing & Inventory
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="price" class="form-label"><i class="bi bi-currency-dollar"></i> Price *</label>
+                                                    <input type="number" class="form-control" id="price" name="price" step="0.01" required value="<?php echo $edit_product['price']; ?>">
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="quantity" class="form-label"><i class="bi bi-box-seam"></i> Quantity</label>
+                                                    <input type="number" class="form-control" id="quantity" name="quantity" value="<?php echo $edit_product['quantity']; ?>">
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div class="mb-0">
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-save"></i> Save Changes
+                                        <hr class="my-4" style="border-color: rgba(66, 165, 245, 0.2);">
+
+                                        <!-- Category -->
+                                        <div class="form-section mb-5">
+                                            <h6 class="text-secondary font-weight-bold mb-3">
+                                                <i class="bi bi-folder"></i> Organization
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label for="category" class="form-label"><i class="bi bi-collection"></i> Category</label>
+                                                <select class="form-select" id="category" name="category">
+                                                    <option value="">Select Category</option>
+                                                    <?php foreach ($all_categories as $cat): ?>
+                                                        <option value="<?php echo $cat['id']; ?>" <?php echo ($edit_product['category_id'] == $cat['id']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($cat['name']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Form Actions -->
+                                        <div class="form-actions pt-3 border-top" style="border-color: rgba(66, 165, 245, 0.2) !important;">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="bi bi-check-circle"></i> Save Changes
                                             </button>
-                                            <a href="products.php" class="btn btn-secondary">Back to Products</a>
+                                            <a href="products.php" class="btn btn-outline-secondary">
+                                                <i class="bi bi-arrow-left"></i> Back to Products
+                                            </a>
                                         </div>
                                     </form>
                                 </div>
                             </div>
 
-                            <!-- Product Showcase Image (Single Main Image) -->
+                            <!-- Product Images (Unified) -->
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-image"></i> Product Showcase Image</h5>
+                                    <h5 class="mb-0"><i class="bi bi-images"></i> Product Images</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="text-muted small mb-3">This is the main product image displayed on the shop page</p>
+                                    <p class="text-muted small mb-4">Upload and manage product images. The primary image will be the showcase image.</p>
                                     
                                     <?php 
                                     $primary_image = null;
@@ -740,59 +500,51 @@ if (isset($_GET['edit'])) {
                                     }
                                     ?>
                                     
-                                    <?php if ($primary_image): ?>
-                                        <div class="mb-3">
-                                            <div style="max-width: 300px; border: 2px solid var(--accent); border-radius: 8px; overflow: hidden;">
-                                                <img src="<?php echo SITE_URL . htmlspecialchars($primary_image['image_path']); ?>" alt="Primary image" style="width: 100%; height: auto; display: block;">
+                                    <!-- Showcase Image -->
+                                    <div class="mb-5">
+                                        <h6 class="text-secondary mb-3 font-weight-bold">Showcase Image</h6>
+                                        <?php if ($primary_image): ?>
+                                            <div class="showcase-image-container mb-3">
+                                                <div class="position-relative d-inline-block">
+                                                    <img src="<?php echo SITE_URL . htmlspecialchars($primary_image['image_path']); ?>" alt="Primary image" class="showcase-image">
+                                                    <span class="badge badge-success position-absolute" style="top: 10px; right: 10px; background-color: #ffc107 !important; padding: 6px 12px; font-size: 0.8rem;">
+                                                        <i class="bi bi-star-fill"></i> SHOWCASE
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <small class="text-muted d-block mt-2">Current showcase image</small>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <form method="POST" enctype="multipart/form-data">
-                                        <input type="hidden" name="action" value="upload_showcase_image">
-                                        <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
-                                        
-                                        <div class="input-group">
-                                            <input type="file" class="form-control" id="showcase_image" name="showcase_image" accept="image/*" required>
-                                            <button class="btn btn-success" type="submit">
-                                                <i class="fas fa-upload"></i> Set as Showcase
-                                            </button>
-                                        </div>
-                                        <small class="text-muted d-block mt-2">Supports: JPEG, PNG, GIF, WebP. Max 5MB.</small>
-                                    </form>
-                                </div>
-                            </div>
+                                        <?php else: ?>
+                                            <p class="text-muted text-center py-4">No showcase image selected yet.</p>
+                                        <?php endif; ?>
+                                    </div>
 
-                            <!-- Product Images -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-images"></i> Product Images</h5>
-                                </div>
-                                <div class="card-body">
+                                    <!-- Gallery Images -->
                                     <?php if (!empty($product_images)): ?>
-                                        <div class="mb-4">
-                                            <p class="text-muted mb-3">Click images to set as primary (gold border = primary)</p>
-                                            <div class="d-flex flex-wrap">
+                                        <div class="mb-5">
+                                            <h6 class="text-secondary mb-3 font-weight-bold">Gallery (<?php echo count($product_images); ?> images)</h6>
+                                            <div class="images-gallery mb-4">
                                                 <?php foreach ($product_images as $image): ?>
-                                                    <div class="image-thumbnail <?php echo $image['is_primary'] ? 'primary' : ''; ?>">
-                                                        <img src="<?php echo SITE_URL . htmlspecialchars($image['image_path']); ?>" alt="<?php echo htmlspecialchars($image['image_name']); ?>" title="<?php echo htmlspecialchars($image['image_name']); ?>">
-                                                        <?php if ($image['is_primary']): ?>
-                                                            <span class="badge badge-primary" style="background-color: var(--accent-gold);">PRIMARY</span>
-                                                        <?php endif; ?>
-                                                        <div class="image-actions">
+                                                    <div class="image-item <?php echo $image['is_primary'] ? 'is-primary' : ''; ?>">
+                                                        <div class="image-wrapper">
+                                                            <img src="<?php echo SITE_URL . htmlspecialchars($image['image_path']); ?>" alt="<?php echo htmlspecialchars($image['image_name']); ?>">
+                                                            <?php if ($image['is_primary']): ?>
+                                                                <div class="image-badge-primary">
+                                                                    <i class="bi bi-star-fill"></i> PRIMARY
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div class="image-actions-group">
                                                             <form method="POST" style="flex: 1;">
                                                                 <input type="hidden" name="action" value="set_primary_image">
                                                                 <input type="hidden" name="image_id" value="<?php echo $image['id']; ?>">
-                                                                <button type="submit" class="btn btn-sm btn-warning w-100" title="Set as primary">
-                                                                    <i class="fas fa-star"></i>
+                                                                <button type="submit" class="btn btn-sm btn-outline-warning w-100" title="Set as primary">
+                                                                    <i class="bi bi-star"></i> Primary
                                                                 </button>
                                                             </form>
                                                             <form method="POST" style="flex: 1;" onsubmit="return confirm('Delete this image?');">
                                                                 <input type="hidden" name="action" value="delete_image">
                                                                 <input type="hidden" name="image_id" value="<?php echo $image['id']; ?>">
-                                                                <button type="submit" class="btn btn-sm btn-danger w-100" title="Delete image">
-                                                                    <i class="fas fa-trash"></i>
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Delete image">
+                                                                    <i class="bi bi-trash"></i> Delete
                                                                 </button>
                                                             </form>
                                                         </div>
@@ -801,18 +553,22 @@ if (isset($_GET['edit'])) {
                                             </div>
                                         </div>
                                     <?php else: ?>
-                                        <p class="text-muted text-center py-4">No images yet. Upload some below.</p>
+                                        <div class="mb-5">
+                                            <p class="text-muted text-center py-4">No images yet. Upload some below.</p>
+                                        </div>
                                     <?php endif; ?>
 
-                                    <div class="mb-3">
-                                        <label for="images" class="form-label">Upload Images</label>
+                                    <!-- Upload Section -->
+                                    <div class="upload-section p-4" style="background: linear-gradient(135deg, rgba(66, 165, 245, 0.08) 0%, rgba(66, 165, 245, 0.03) 100%); border: 2px dashed rgba(66, 165, 245, 0.4); border-radius: 12px;">
+                                        <h6 class="text-secondary mb-3 font-weight-bold"><i class="bi bi-cloud-upload"></i> Upload New Images</h6>
                                         <form method="POST" enctype="multipart/form-data">
-                                            <div class="input-group">
-                                                <input type="hidden" name="action" value="upload_images">
-                                                <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
+                                            <input type="hidden" name="action" value="upload_images">
+                                            <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
+                                            
+                                            <div class="input-group mb-2">
                                                 <input type="file" class="form-control" id="images" name="images[]" accept="image/*" multiple required>
                                                 <button class="btn btn-primary" type="submit">
-                                                    <i class="fas fa-upload"></i> Upload
+                                                    <i class="bi bi-upload"></i> Upload
                                                 </button>
                                             </div>
                                             <small class="text-muted">Supports: JPEG, PNG, GIF, WebP. Max 5MB per image.</small>
@@ -824,69 +580,96 @@ if (isset($_GET['edit'])) {
                             <!-- Product Files for Download -->
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-file-download"></i> Download Files</h5>
+                                    <h5 class="mb-0"><i class="bi bi-cloud-download"></i> Download Files</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="file-manager-section">
-                                        <div class="file-upload-form">
-                                            <form id="fileUploadForm" enctype="multipart/form-data">
-                                                <input type="hidden" id="product_id" value="<?php echo $edit_product['id']; ?>">
-                                                
-                                                <div class="form-group mb-3">
-                                                    <label for="fileInput" class="form-label">Select File to Upload</label>
+                                    <div id="filesList" class="files-list-container mb-4">
+                                        <!-- Files list will be populated here -->
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="upload-section">
+                                        <h6 class="text-secondary mb-3">Add Download File</h6>
+                                        <form id="fileUploadForm" enctype="multipart/form-data" class="upload-form">
+                                            <input type="hidden" id="product_id" value="<?php echo $edit_product['id']; ?>">
+                                            
+                                            <!-- File Selection -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-12">
+                                                    <label for="fileInput" class="form-label">Select File *</label>
                                                     <input type="file" id="fileInput" name="file" class="form-control" required>
                                                     <small class="text-muted d-block mt-2">
-                                                        Supported: zip, pdf, exe, dmg, rar, txt, doc, docx, xls, xlsx, ppt, pptx, 7z, iso (Max 500MB)
+                                                        Supports: zip, pdf, exe, dmg, rar, txt, doc, docx, xls, xlsx, ppt, pptx, 7z, iso (Max 500MB)
                                                     </small>
                                                 </div>
+                                            </div>
 
-                                                <div class="form-group mb-3">
+                                            <!-- Display Name & Version -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-8">
                                                     <label for="displayName" class="form-label">Display Name *</label>
                                                     <input type="text" id="displayName" name="display_name" class="form-control" placeholder="e.g., Software Setup" required>
+                                                    <small class="text-muted d-block mt-2">Name shown to customers</small>
                                                 </div>
-
-                                                <div class="form-group mb-3">
+                                                <div class="col-md-4">
                                                     <label for="version" class="form-label">Version</label>
-                                                    <input type="text" id="version" name="version" class="form-control" placeholder="e.g., 1.0.0">
+                                                    <input type="text" id="version" name="version" class="form-control" placeholder="1.0.0">
+                                                    <small class="text-muted d-block mt-2">e.g., 1.0.0</small>
                                                 </div>
+                                            </div>
 
-                                                <div class="form-group mb-3">
+                                            <!-- Description -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-12">
                                                     <label for="fileDescription" class="form-label">Description</label>
                                                     <textarea id="fileDescription" name="description" class="form-control" rows="2" placeholder="What does this file contain?"></textarea>
                                                 </div>
+                                            </div>
 
-                                                <div class="form-group mb-3">
-                                                    <label for="sizeVariant" class="form-label">Size Variant <span class="text-danger">*</span></label>
-                                                    <select id="sizeVariant" name="size_variant" class="form-control" required>
+                                            <!-- Size & Color Variants -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <label for="sizeVariant" class="form-label">Size Variant *</label>
+                                                    <select id="sizeVariant" name="size_variant" class="form-select" required>
                                                         <option value="">-- Select Size --</option>
                                                     </select>
-                                                    <small class="text-muted d-block mt-1">Sizes defined for this product below</small>
+                                                    <small class="text-muted d-block mt-1">Which product size is this for?</small>
                                                 </div>
-
-                                                <div class="form-group mb-3">
-                                                    <label for="colorVariant" class="form-label">Color Variant <span class="text-danger">*</span></label>
-                                                    <select id="colorVariant" name="color_variant" class="form-control" required>
+                                                <div class="col-md-6">
+                                                    <label for="colorVariant" class="form-label">Color Variant *</label>
+                                                    <select id="colorVariant" name="color_variant" class="form-select" required>
                                                         <option value="">-- Select Color --</option>
                                                     </select>
-                                                    <small class="text-muted d-block mt-1">Colors defined for this product below</small>
+                                                    <small class="text-muted d-block mt-1">Which product color is this for?</small>
                                                 </div>
+                                            </div>
 
-                                                <div class="file-info-display mb-3">
-                                                    <div id="fileInfo" style="display: none;">
-                                                        <strong>Selected File:</strong>
-                                                        <div id="fileName"></div>
-                                                        <div id="fileSize"></div>
-                                                        <div id="fileType"></div>
+                                            <!-- File Preview -->
+                                            <div id="fileInfo" class="file-preview-box mb-4" style="display: none;">
+                                                <div class="preview-success-badge">
+                                                    <i class="bi bi-check-circle-fill"></i> File Ready
+                                                </div>
+                                                <div class="preview-info">
+                                                    <div class="info-group">
+                                                        <span class="info-label">Name:</span>
+                                                        <span class="info-value" id="fileName"></span>
+                                                    </div>
+                                                    <div class="info-group">
+                                                        <span class="info-label">Size:</span>
+                                                        <span class="info-value" id="fileSize"></span>
+                                                    </div>
+                                                    <div class="info-group">
+                                                        <span class="info-label">Type:</span>
+                                                        <span class="info-value" id="fileType"></span>
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                <button type="submit" class="btn btn-primary w-100">
-                                                    <i class="fas fa-upload"></i> Upload File
-                                                </button>
-                                            </form>
-                                        </div>
-
-                                        <div id="filesList" class="files-list mt-4"></div>
+                                            <button type="submit" class="btn btn-success w-100">
+                                                <i class="bi bi-cloud-upload"></i> Upload File
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -931,8 +714,8 @@ if (isset($_GET['edit'])) {
                                     if (file) {
                                         const size = (file.size / 1024 / 1024).toFixed(2);
                                         document.getElementById('fileName').textContent = file.name;
-                                        document.getElementById('fileSize').textContent = 'Size: ' + size + ' MB';
-                                        document.getElementById('fileType').textContent = 'Type: ' + file.type;
+                                        document.getElementById('fileSize').textContent = size + ' MB';
+                                        document.getElementById('fileType').textContent = file.type || 'Unknown';
                                         document.getElementById('fileInfo').style.display = 'block';
                                     }
                                 });
@@ -946,21 +729,21 @@ if (isset($_GET['edit'])) {
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.files && data.files.length > 0) {
-                                            let html = '<h6>Uploaded Files:</h6><div class="table-responsive"><table class="table table-sm"><thead><tr><th>File Name</th><th>Display Name</th><th>Size</th><th>Variant</th><th>Action</th></tr></thead><tbody>';
+                                            let html = '<h6 class="text-secondary mb-3">Uploaded Files (' + data.files.length + ')</h6>';
+                                            html += '<div class="table-responsive"><table class="table table-hover"><thead><tr><th>File Name</th><th>Display Name</th><th>Size</th><th>Version</th><th>Variant</th><th class="text-end">Action</th></tr></thead><tbody>';
                                             
                                             data.files.forEach(file => {
-                                                const variant = file.size_variant || file.color_variant 
-                                                    ? `${file.size_variant || '-'} / ${file.color_variant || '-'}`
-                                                    : 'Generic';
+                                                const variant = (file.size_variant || '-') + ' / ' + (file.color_variant || '-');
                                                 
                                                 html += `<tr>
-                                                    <td><small>${file.original_filename}</small></td>
+                                                    <td><small><i class="bi bi-file-earmark"></i> ${file.original_filename}</small></td>
                                                     <td><strong>${file.display_name}</strong></td>
                                                     <td><small>${(file.file_size / 1024 / 1024).toFixed(2)} MB</small></td>
+                                                    <td><small>${file.version || '-'}</small></td>
                                                     <td><span class="badge bg-info">${variant}</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-danger" onclick="deleteFile(${file.id})">
-                                                            <i class="fas fa-trash"></i> Delete
+                                                    <td class="text-end">
+                                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile(${file.id})" title="Delete file">
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </td>
                                                 </tr>`;
@@ -969,12 +752,12 @@ if (isset($_GET['edit'])) {
                                             html += '</tbody></table></div>';
                                             filesList.innerHTML = html;
                                         } else {
-                                            filesList.innerHTML = '<p class="text-muted">No files uploaded yet.</p>';
+                                            filesList.innerHTML = '<p class="text-muted text-center py-3"><i class="bi bi-info-circle"></i> No files uploaded yet. Add one below.</p>';
                                         }
                                     })
                                     .catch(error => {
                                         console.error('Error loading files:', error);
-                                        filesList.innerHTML = '<p class="text-danger">Error loading files.</p>';
+                                        filesList.innerHTML = '<p class="text-danger"><i class="bi bi-exclamation-triangle"></i> Error loading files.</p>';
                                     });
                             }
                             
@@ -1085,54 +868,197 @@ if (isset($_GET['edit'])) {
                             <!-- Colors -->
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-palette"></i> Colors</h5>
+                                    <h5 class="mb-0"><i class="bi bi-palette"></i> Colors</h5>
                                 </div>
                                 <div class="card-body">
                                     <?php if (!empty($product_colors)): ?>
-                                        <div class="mb-3">
-                                            <?php foreach ($product_colors as $color): ?>
-                                                <div class="variant-item">
-                                                    <div style="flex: 1;">
-                                                        <span class="color-preview" style="background-color: <?php echo htmlspecialchars($color['color_code'] ?? '#ccc'); ?>"></span>
-                                                        <strong><?php echo htmlspecialchars($color['color_name']); ?></strong>
-                                                        <?php if ($color['color_code']): ?>
-                                                            <small class="text-muted"><?php echo htmlspecialchars($color['color_code']); ?></small>
-                                                        <?php endif; ?>
+                                        <div class="mb-4">
+                                            <h6 class="text-secondary mb-3">Existing Colors</h6>
+                                            <div class="colors-grid">
+                                                <?php foreach ($product_colors as $color): ?>
+                                                    <div class="color-card">
+                                                        <div class="color-swatch" style="background-color: <?php echo htmlspecialchars($color['color_code'] ?? '#ccc'); ?>"></div>
+                                                        <div class="color-info">
+                                                            <strong><?php echo htmlspecialchars($color['color_name']); ?></strong>
+                                                            <?php if ($color['color_code']): ?>
+                                                                <small class="text-muted d-block"><?php echo htmlspecialchars($color['color_code']); ?></small>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <form method="POST" class="color-delete-form">
+                                                            <input type="hidden" name="action" value="delete_color">
+                                                            <input type="hidden" name="color_id" value="<?php echo $color['id']; ?>">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this color?');" title="Delete color">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
                                                     </div>
-                                                    <form method="POST" style="display: inline;">
-                                                        <input type="hidden" name="action" value="delete_color">
-                                                        <input type="hidden" name="color_id" value="<?php echo $color['id']; ?>">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this color?');">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            <?php endforeach; ?>
+                                                <?php endforeach; ?>
+                                            </div>
                                         </div>
+                                        <hr>
                                     <?php endif; ?>
 
-                                    <form method="POST" class="mb-3">
-                                        <input type="hidden" name="action" value="add_color">
-                                        <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
-                                        <input type="hidden" name="display_order" value="<?php echo count($product_colors); ?>">
+                                    <div>
+                                        <h6 class="text-secondary mb-3">Add New Color</h6>
+                                        
+                                        <!-- Pattern Type Selector -->
+                                        <div class="pattern-selector mb-4">
+                                            <small class="text-muted d-block mb-2">Pattern Type:</small>
+                                            <div class="pattern-buttons">
+                                                <button type="button" class="pattern-btn active" data-pattern="solid" onclick="setPatternType('solid')" title="Solid color">
+                                                    <i class="bi bi-circle-fill"></i> Solid
+                                                </button>
+                                                <button type="button" class="pattern-btn" data-pattern="stripes" onclick="setPatternType('stripes')" title="Stripes">
+                                                    <i class="bi bi-lines"></i> Stripes
+                                                </button>
+                                                <button type="button" class="pattern-btn" data-pattern="split" onclick="setPatternType('split')" title="Split colors">
+                                                    <i class="bi bi-square-split"></i> Split
+                                                </button>
+                                                <button type="button" class="pattern-btn" data-pattern="gradient" onclick="setPatternType('gradient')" title="Gradient blend">
+                                                    <i class="bi bi-arrow-right"></i> Gradient
+                                                </button>
+                                            </div>
+                                        </div>
 
-                                        <div class="mb-2">
-                                            <input type="text" name="color_name" class="form-control form-control-sm" placeholder="Color name" required>
+                                        <!-- Quick color presets -->
+                                        <div class="preset-colors mb-4">
+                                            <small class="text-muted d-block mb-2">Quick Presets:</small>
+                                            <div class="preset-buttons">
+                                                <button type="button" class="preset-btn" style="background-color: #FFFFFF; border: 2px solid var(--border);" onclick="setColorPreset('#FFFFFF', 'White')" title="White"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #000000;" onclick="setColorPreset('#000000', 'Black')" title="Black"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #FF0000;" onclick="setColorPreset('#FF0000', 'Red')" title="Red"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #00FF00;" onclick="setColorPreset('#00FF00', 'Green')" title="Green"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #0000FF;" onclick="setColorPreset('#0000FF', 'Blue')" title="Blue"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #FFFF00;" onclick="setColorPreset('#FFFF00', 'Yellow')" title="Yellow"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #FF8000;" onclick="setColorPreset('#FF8000', 'Orange')" title="Orange"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #800080;" onclick="setColorPreset('#800080', 'Purple')" title="Purple"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #FFC0CB;" onclick="setColorPreset('#FFC0CB', 'Pink')" title="Pink"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #808080;" onclick="setColorPreset('#808080', 'Gray')" title="Gray"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #00FFFF;" onclick="setColorPreset('#00FFFF', 'Cyan')" title="Cyan"></button>
+                                                <button type="button" class="preset-btn" style="background-color: #800000;" onclick="setColorPreset('#800000', 'Maroon')" title="Maroon"></button>
+                                            </div>
                                         </div>
-                                        <div class="mb-2">
-                                            <input type="color" name="color_code" class="form-control form-control-sm" value="#000000">
-                                        </div>
-                                        <button type="submit" class="btn btn-sm btn-success w-100">
-                                            <i class="fas fa-plus"></i> Add Color
-                                        </button>
-                                    </form>
+
+                                        <form method="POST" class="add-color-form">
+                                            <input type="hidden" name="action" value="add_color">
+                                            <input type="hidden" name="product_id" value="<?php echo $edit_product['id']; ?>">
+                                            <input type="hidden" name="display_order" value="<?php echo count($product_colors); ?>">
+                                            <input type="hidden" id="pattern_type" name="pattern_type" value="solid">
+
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div>
+                                                        <label for="color_name_input" class="form-label">Color Name</label>
+                                                        <input type="text" id="color_name_input" name="color_name" class="form-control" placeholder="e.g. Forest Green" required>
+                                                        <small class="text-muted">Give your color a descriptive name</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div>
+                                                        <label for="color_code_input" class="form-label" id="primary_color_label">Color Code</label>
+                                                        <div class="color-picker-wrapper">
+                                                            <input type="color" id="color_code_input" name="color_code" class="color-picker-input" value="#000000" onchange="updateColorPreview()" oninput="updateColorPreview()">
+                                                            <input type="text" id="color_hex_display" class="form-control form-control-sm" value="#000000" readonly placeholder="Hex code">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Secondary Color (for patterns) -->
+                                            <div class="row g-3 mt-2" id="secondary_color_section" style="display: none;">
+                                                <div class="col-md-6">
+                                                    <label for="color_code_input_2" class="form-label">Secondary Color</label>
+                                                    <div class="color-picker-wrapper">
+                                                        <input type="color" id="color_code_input_2" name="color_code_2" class="color-picker-input" value="#FFFFFF" onchange="updateColorPreview()" oninput="updateColorPreview()">
+                                                        <input type="text" id="color_hex_display_2" class="form-control form-control-sm" value="#FFFFFF" readonly placeholder="Hex code">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="color-preview-box mt-3">
+                                                <div id="colorPreviewDisplay" class="color-preview-large" style="background-color: #000000;"></div>
+                                                <div class="color-preview-text">
+                                                    <strong id="previewColorName">Color Preview</strong>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-success w-100 mt-3">
+                                                <i class="bi bi-plus-circle"></i> Add Color
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
+
+                            <script>
+                            let currentPattern = 'solid';
+
+                            function setPatternType(pattern) {
+                                currentPattern = pattern;
+                                document.getElementById('pattern_type').value = pattern;
+                                
+                                // Update button active state
+                                document.querySelectorAll('.pattern-btn').forEach(btn => {
+                                    btn.classList.remove('active');
+                                });
+                                document.querySelector(`[data-pattern="${pattern}"]`).classList.add('active');
+                                
+                                // Show/hide secondary color input
+                                const secondarySection = document.getElementById('secondary_color_section');
+                                const primaryLabel = document.getElementById('primary_color_label');
+                                
+                                if (pattern === 'solid') {
+                                    secondarySection.style.display = 'none';
+                                    primaryLabel.textContent = 'Color Code';
+                                } else {
+                                    secondarySection.style.display = 'block';
+                                    primaryLabel.textContent = pattern.charAt(0).toUpperCase() + pattern.slice(1) + ' - Primary Color';
+                                }
+                                
+                                updateColorPreview();
+                            }
+
+                            function setColorPreset(hexCode, colorName) {
+                                document.getElementById('color_code_input').value = hexCode;
+                                document.getElementById('color_name_input').value = colorName;
+                                updateColorPreview();
+                            }
+
+                            function updateColorPreview() {
+                                const color1 = document.getElementById('color_code_input').value.toUpperCase();
+                                const color2 = document.getElementById('color_code_input_2').value.toUpperCase();
+                                const hexDisplay = document.getElementById('color_hex_display');
+                                const hexDisplay2 = document.getElementById('color_hex_display_2');
+                                const previewBox = document.getElementById('colorPreviewDisplay');
+                                const colorName = document.getElementById('color_name_input').value || 'Color Preview';
+                                
+                                hexDisplay.value = color1;
+                                hexDisplay2.value = color2;
+                                document.getElementById('previewColorName').textContent = colorName;
+                                
+                                // Apply preview based on pattern type
+                                if (currentPattern === 'solid') {
+                                    previewBox.style.background = color1;
+                                } else if (currentPattern === 'stripes') {
+                                    previewBox.style.background = `repeating-linear-gradient(90deg, ${color1} 0px, ${color1} 10px, ${color2} 10px, ${color2} 20px)`;
+                                } else if (currentPattern === 'split') {
+                                    previewBox.style.background = `linear-gradient(90deg, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`;
+                                } else if (currentPattern === 'gradient') {
+                                    previewBox.style.background = `linear-gradient(90deg, ${color1}, ${color2})`;
+                                }
+                            }
+
+                            // Initialize color preview on page load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                updateColorPreview();
+                                document.getElementById('color_name_input').addEventListener('input', updateColorPreview);
+                            });
+                            </script>
 
                             <!-- Sizes -->
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-ruler"></i> Sizes</h5>
+                                    <h5 class="mb-0"><i class="bi bi-rulers"></i> Sizes</h5>
                                 </div>
                                 <div class="card-body">
                                     <?php if (!empty($product_sizes)): ?>
@@ -1146,7 +1072,7 @@ if (isset($_GET['edit'])) {
                                                         <input type="hidden" name="action" value="delete_size">
                                                         <input type="hidden" name="size_id" value="<?php echo $size['id']; ?>">
                                                         <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this size?');">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -1163,7 +1089,7 @@ if (isset($_GET['edit'])) {
                                             <input type="text" name="size_name" class="form-control form-control-sm" placeholder="e.g. S, M, L, XL" required>
                                         </div>
                                         <button type="submit" class="btn btn-sm btn-success w-100">
-                                            <i class="fas fa-plus"></i> Add Size
+                                            <i class="bi bi-plus"></i> Add Size
                                         </button>
                                     </form>
                                 </div>
@@ -1176,8 +1102,8 @@ if (isset($_GET['edit'])) {
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">All Products (Drag to Reorder)</h5>
-                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                                <i class="fas fa-plus"></i> Add New Product
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                <i class="bi bi-plus"></i> Add New Product
                             </button>
                         </div>
                         <div class="card-body">
@@ -1189,14 +1115,14 @@ if (isset($_GET['edit'])) {
                                         $prod_images = getProductImages($product['id'], $conn);
                                         $img_count = count($prod_images);
                                     ?>
-                                        <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-product-id="<?php echo $product['id']; ?>" style="cursor: grab; background: var(--primary-light); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 8px; padding: 15px; border-radius: 6px;">
+                                        <div class="list-group-item d-flex align-items-center justify-content-between sortable-item" data-product-id="<?php echo $product['id']; ?>" style="cursor: grab; background: var(--dark-1); color: var(--text-primary); border: 1px solid var(--border); margin-bottom: 8px; padding: 15px; border-radius: 6px;">
                                             <div class="d-flex align-items-center flex-grow-1">
-                                                <i class="fas fa-grip-vertical me-3" style="cursor: grab; color: var(--text-secondary);"></i>
+                                                <i class="bi bi-grip-vertical me-3" style="cursor: grab; color: var(--text-secondary);"></i>
                                                 <div>
-                                                    <strong style="color: var(--text-primary);">
+                                                    <strong style="color: var(--text-secondary); font-weight: 600;">
                                                         <?php echo htmlspecialchars($product['name']); ?>
                                                         <?php if ($product['is_hidden']): ?>
-                                                            <span class="badge bg-danger" style="margin-left: 8px;"><i class="fas fa-eye-slash"></i> Hidden</span>
+                                                            <span class="badge bg-danger" style="margin-left: 8px;"><i class="bi bi-eye-slash"></i> Hidden</span>
                                                         <?php endif; ?>
                                                     </strong>
                                                     <br>
@@ -1205,7 +1131,7 @@ if (isset($_GET['edit'])) {
                                                         <span class="badge bg-info">$<?php echo number_format($product['price'], 2); ?></span>
                                                         <span class="badge bg-warning text-dark">Stock: <?php echo $product['quantity']; ?></span>
                                                         <?php if ($img_count > 0): ?>
-                                                            <span class="badge bg-success"><i class="fas fa-image"></i> <?php echo $img_count; ?></span>
+                                                            <span class="badge bg-success"><i class="bi bi-image"></i> <?php echo $img_count; ?></span>
                                                         <?php else: ?>
                                                             <span class="badge bg-danger">0 images</span>
                                                         <?php endif; ?>
@@ -1214,13 +1140,13 @@ if (isset($_GET['edit'])) {
                                             </div>
                                             <div class="d-flex align-items-center gap-2">
                                                 <button class="btn btn-sm <?php echo $product['is_hidden'] ? 'btn-success' : 'btn-warning'; ?>" onclick="toggleProductVisibility(<?php echo $product['id']; ?>, <?php echo $product['is_hidden']; ?>)" title="<?php echo $product['is_hidden'] ? 'Unhide product' : 'Hide product'; ?>">
-                                                    <i class="fas <?php echo $product['is_hidden'] ? 'fa-eye' : 'fa-eye-slash'; ?>"></i>
+                                                    <i class="bi <?php echo $product['is_hidden'] ? 'bi-eye' : 'bi-eye-slash'; ?>"></i>
                                                 </button>
                                                 <a href="?edit=<?php echo $product['id']; ?>" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-edit"></i> Edit
+                                                    <i class="bi bi-pencil"></i> Edit
                                                 </a>
                                                 <button class="btn btn-sm btn-danger" onclick="deleteProduct(<?php echo $product['id']; ?>)">
-                                                    <i class="fas fa-trash"></i> Delete
+                                                    <i class="bi bi-trash"></i> Delete
                                                 </button>
                                             </div>
                                         </div>
@@ -1321,6 +1247,7 @@ if (isset($_GET['edit'])) {
                 </form>
             </div>
         </div>
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

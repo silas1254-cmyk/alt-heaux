@@ -139,35 +139,34 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Management - Admin Panel</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <?php include('_sidebar.php'); ?>
-        
-        <div class="col-md-9 main-content">
-            <div class="page-header">
-                <h1><i class="fas fa-bars"></i> Navigation Menu</h1>
-            </div>
+<div class="wrapper">
+    <?php include('_sidebar.php'); ?>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1><i class="bi bi-list"></i> Navigation Menu</h1>
+        </div>
             
             <?php if ($message): ?>
                 <div class="alert alert-success" role="alert">
-                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($message); ?>
+                    <i class="bi bi-check-circle"></i> <?php echo htmlspecialchars($message); ?>
                 </div>
             <?php endif; ?>
             
             <?php if ($error): ?>
                 <div class="alert alert-danger" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+                    <i class="bi bi-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
                 </div>
             <?php endif; ?>
             
             <!-- Add New Menu Item -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-plus"></i> Add New Menu Item
+                    <h5 class="mb-0"><i class="bi bi-plus"></i> Add New Menu Item</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" class="row g-3">
@@ -195,7 +194,7 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                         
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-plus-circle"></i> Add Menu Item
+                                <i class="bi bi-plus-circle"></i> Add Menu Item
                             </button>
                         </div>
                     </form>
@@ -205,12 +204,12 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
             <!-- Current Menu Items -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-list"></i> Current Menu Items
-                    <span class="text-muted" style="font-size: 0.9em; margin-left: 10px;"><i class="fas fa-arrows-alt-v"></i> Drag to reorder items and organize hierarchy</span>
+                    <h5 class="mb-0"><i class="bi bi-list"></i> Current Menu Items
+                    <span class="text-muted" style="font-size: 0.9em; margin-left: 10px;"><i class="bi bi-arrows-vertical"></i> Drag to reorder items and organize hierarchy</span></h5>
                 </div>
                 <div class="card-body">
                     <?php if (empty($menu_items)): ?>
-                        <p class="text-muted"><i class="fas fa-info-circle"></i> No menu items yet. Add one above!</p>
+                        <p class="text-muted"><i class="bi bi-info-circle"></i> No menu items yet. Add one above!</p>
                     <?php else: ?>
                         <div id="sortable-menu" class="menu-tree">
                             <?php foreach ($menu_items as $item): 
@@ -220,11 +219,11 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                     <div class="row align-items-center">
                                         <div class="col-md-6">
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <i class="fas fa-grip-vertical" style="color: var(--text-muted); cursor: grab;"></i>
+                                                <i class="bi bi-grip-vertical" style="color: var(--text-muted); cursor: grab;"></i>
                                                 <div>
                                                     <div class="menu-item-label">
                                                         <?php if ($item['parent_id']): ?>
-                                                            <i class="fas fa-arrow-right text-muted"></i>
+                                                            <i class="bi bi-arrow-right text-muted"></i>
                                                         <?php endif; ?>
                                                         <?php echo htmlspecialchars($item['label']); ?>
                                                     </div>
@@ -239,17 +238,17 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
                                         </div>
                                         <div class="col-md-4 text-end">
                                             <button class="btn btn-sm <?php echo $item['active'] ? 'btn-warning' : 'btn-success'; ?>" onclick="toggleMenuItemVisibility(<?php echo $item['id']; ?>, <?php echo $item['active']; ?>)" title="<?php echo $item['active'] ? 'Hide menu item' : 'Show menu item'; ?>">
-                                                <i class="fas <?php echo $item['active'] ? 'fa-eye-slash' : 'fa-eye'; ?>"></i>
+                                                <i class="bi <?php echo $item['active'] ? 'bi-eye-slash' : 'bi-eye'; ?>"></i>
                                             </button>
                                             <button class="btn btn-sm btn-warning edit-menu-btn" data-menu-id="<?php echo $item['id']; ?>" data-label="<?php echo htmlspecialchars($item['label']); ?>" data-url="<?php echo htmlspecialchars($item['url']); ?>" data-active="<?php echo $item['active']; ?>">
-                                                <i class="fas fa-edit"></i> Edit
+                                                <i class="bi bi-pencil"></i> Edit
                                             </button>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="<?php echo $item['id']; ?>">
                                                 <button type="submit" class="btn btn-sm btn-danger" 
                                                         onclick="return confirm('Delete this menu item?');">
-                                                    <i class="fas fa-trash"></i> Delete
+                                                    <i class="bi bi-trash"></i> Delete
                                                 </button>
                                             </form>
                                         </div>
@@ -350,7 +349,7 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
         const btn = event.target.closest('button');
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
 
         // Send AJAX request
         fetch('menus.php', {
@@ -369,7 +368,7 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
             if (data.success) {
                 const newActive = data.new_active;
                 // Update button appearance
-                btn.innerHTML = newActive ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+                btn.innerHTML = newActive ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
                 btn.className = newActive ? 'btn btn-sm btn-warning' : 'btn btn-sm btn-success';
                 btn.title = newActive ? 'Hide menu item' : 'Show menu item';
                 btn.disabled = false;
@@ -442,7 +441,7 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
         .catch(error => console.error('Error:', error));
     }
 </script>
-<style>
+</head>
     .menu-tree {
         padding: 10px;
     }
@@ -583,6 +582,6 @@ $parent_items = array_filter($menu_items, function($item) { return $item['parent
     .modal-backdrop {
         background: rgba(0, 0, 0, 0.6) !important;
     }
-</style>
-</body>
+</head>
+<body>
 </html>

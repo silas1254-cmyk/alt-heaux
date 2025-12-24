@@ -47,8 +47,8 @@ require_once('../includes/admin_auth.php');
 require_once('../includes/rate_limit.php');
 require_once('../includes/csrf_protection.php');
 
-// Check rate limiting (100 requests per hour per IP)
-checkRateLimit($_SESSION['admin_id'] ?? null, 100, 3600);
+// Check rate limiting (1000 requests per hour per admin user)
+checkRateLimit($_SESSION['admin_id'] ?? null, 1000, 3600);
 
 // Verify database connection
 if (!isset($conn) || !$conn) {

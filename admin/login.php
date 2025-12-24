@@ -47,31 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - <?php echo SITE_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-        }
-        .card {
-            border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-        .card-body {
-            padding: 3rem;
-        }
-        .card-title {
-            color: #1a1a1a;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
 </head>
 <body>
     <div class="login-container">

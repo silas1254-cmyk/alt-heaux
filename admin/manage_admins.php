@@ -92,20 +92,19 @@ $approved_admins = getApprovedAdmins($conn);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Management - <?php echo SITE_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <?php include('_sidebar.php'); ?>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <?php include('_sidebar.php'); ?>
 
-            <!-- Main Content -->
-            <div class="col-md-9 main-content">
-                <div class="page-header">
-                    <h1>Admin Management</h1>
-                </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1>Admin Management</h1>
+            </div>
 
                 <?php if ($message): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -123,8 +122,8 @@ $approved_admins = getApprovedAdmins($conn);
 
                 <!-- Register New Admin -->
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-user-plus"></i> Register New Admin</h5>
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person-plus"></i> Register New Admin</h5>
                     </div>
                     <div class="card-body">
                         <form method="POST" class="row g-3">
@@ -152,7 +151,7 @@ $approved_admins = getApprovedAdmins($conn);
                             
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> Create Admin Account
+                                    <i class="bi bi-person-plus"></i> Create Admin Account
                                 </button>
                             </div>
                         </form>
@@ -161,7 +160,7 @@ $approved_admins = getApprovedAdmins($conn);
 
                 <!-- Approved Admins -->
                 <div class="card">
-                    <div class="card-header bg-success">
+                    <div class="card-header">
                         <h5 class="mb-0">Active Admins (<?php echo count($approved_admins); ?>)</h5>
                     </div>
                     <div class="card-body">
@@ -181,7 +180,7 @@ $approved_admins = getApprovedAdmins($conn);
                                     </thead>
                                     <tbody>
                                         <?php foreach ($approved_admins as $admin): ?>
-                                            <tr <?php if ($admin['role'] === 'Owner') echo 'style="background-color: #1a1a1a; color: gold; font-weight: bold;"'; elseif ($admin['role'] === 'Administrator') echo 'style="background-color: #228B22; color: white;"'; ?>>
+                                            <tr>
                                                 <td><?php echo htmlspecialchars($admin['username']); ?></td>
                                                 <td><?php echo htmlspecialchars($admin['email']); ?></td>
                                                 <td>

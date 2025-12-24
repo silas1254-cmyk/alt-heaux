@@ -52,7 +52,7 @@ $total_pages = ceil($total / $limit);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Log - <?php echo SITE_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo SITE_URL; ?>css/admin.css">
 </head>
 <body>
@@ -122,13 +122,13 @@ $total_pages = ceil($total / $limit);
                                             <div class="mb-2">
                                                 <span class="badge bg-info"><?php echo htmlspecialchars($update['category']); ?></span>
                                                 <span class="badge bg-<?php 
-                                                    echo match($update['update_type']) {
+                                                    echo match($update['update_type'] ?? 'unknown') {
                                                         'Create' => 'success',
                                                         'Delete' => 'danger',
                                                         'Update' => 'warning',
                                                         default => 'secondary'
                                                     };
-                                                ?>"><?php echo htmlspecialchars($update['update_type']); ?></span>
+                                                ?>"><?php echo htmlspecialchars($update['update_type'] ?? 'Unknown'); ?></span>
                                             </div>
                                             <h5 class="mb-2"><?php echo htmlspecialchars($update['title']); ?></h5>
                                             <p class="text-muted mb-2"><?php echo nl2br(htmlspecialchars($update['description'])); ?></p>

@@ -21,6 +21,10 @@ $stmt->close();
 // Check permission - Owners and Administrators can view full audit log
 $can_view_all = isset($_SESSION['admin_role']) && in_array($_SESSION['admin_role'], ['Owner', 'Administrator']);
 
+// Determine active tab
+$active_tab = $_GET['tab'] ?? 'audit';
+
+// ============== AUDIT LOG DATA (tab: audit) ==============
 // Pagination
 $limit = 50;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -29,13 +33,13 @@ $offset = ($page - 1) * $limit;
 // Filters
 $log_type = $_GET['type'] ?? null;
 $category = $_GET['category'] ?? null;
-$admin_id = $_GET['admin'] ?? null;
+$audit_admin_id = $_GET['admin'] ?? null;
 $date_from = $_GET['from'] ?? null;
 $date_to = $_GET['to'] ?? null;
 
 // Get audit logs
-$logs = getAuditLog($limit, $offset, $log_type, $admin_id, $category, $date_from, $date_to);
-$total = getAuditLogCount($log_type, $admin_id, $category);
+$logs = getAuditLog($limit, $offset, $log_type, $audit_admin_id, $category, $date_from, $date_to);
+$total = getAuditLogCount($log_type, $audit_admin_id, $category);
 $pages = ceil($total / $limit);
 
 // Get statistics
@@ -54,6 +58,52 @@ $result = $conn->query("SELECT DISTINCT category FROM audit_log ORDER BY categor
 if ($result) {
     $categories = $result->fetch_all(MYSQLI_ASSOC);
 }
+
+// ============== ADMIN LOGS DATA (tab: admin) ==============
+$filter_admin = $_GET['admin_filter'] ?? '';
+$filter_action = $_GET['action'] ?? '';
+$filter_date = $_GET['date'] ?? '';
+
+// Build admin logs query
+$admin_query = "SELECT l.*, a.username FROM admin_logs l LEFT JOIN admin_users a ON l.admin_id = a.id WHERE 1=1";
+$admin_params = [];
+$admin_param_types = '';
+
+if (!empty($filter_admin)) {
+    $admin_query .= " AND l.admin_id = ?";
+    $admin_params[] = intval($filter_admin);
+    $admin_param_types .= 'i';
+}
+
+if (!empty($filter_action)) {
+    $admin_query .= " AND l.action LIKE ?";
+    $admin_params[] = '%' . $filter_action . '%';
+    $admin_param_types .= 's';
+}
+
+if (!empty($filter_date)) {
+    $admin_query .= " AND DATE(l.created_at) = ?";
+    $admin_params[] = $filter_date;
+    $admin_param_types .= 's';
+}
+
+$admin_query .= " ORDER BY l.created_at DESC LIMIT 1000";
+
+// Execute admin logs query
+$admin_stmt = $conn->prepare($admin_query);
+if (!empty($admin_params)) {
+    $admin_stmt->bind_param($admin_param_types, ...$admin_params);
+}
+$admin_stmt->execute();
+$admin_logs = $admin_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Get unique admins for admin logs filter
+$admin_admins_result = $conn->query("SELECT id, username FROM admin_users ORDER BY username");
+$admin_admins = $admin_admins_result->fetch_all(MYSQLI_ASSOC);
+
+// Get unique actions for admin logs filter
+$admin_actions_result = $conn->query("SELECT DISTINCT action FROM admin_logs ORDER BY action");
+$admin_actions = $admin_actions_result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -63,127 +113,34 @@ if ($result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Log - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="../css/admin.css" rel="stylesheet">
-    <style>
-        body {
-            background: #1a1a1a;
-            color: #e0e0e0;
-        }
-
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: #2a2a2a;
-            border-right: 1px solid #444;
-            flex-shrink: 0;
-        }
-
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            background: #1a1a1a;
-        }
-
-        .log-type-badge {
-            font-size: 0.75rem;
-            padding: 0.35rem 0.6rem;
-        }
-
-        .log-type-action {
-            background-color: #0dcaf0 !important;
-        }
-
-        .log-type-change {
-            background-color: #0d6efd !important;
-        }
-
-        .log-type-system {
-            background-color: #6c757d !important;
-        }
-
-        .category-cell {
-            font-weight: 500;
-            color: #0d6efd;
-        }
-
-        .timestamp-cell {
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        .ip-cell {
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-
-        .filter-card {
-            background: #2a2a2a;
-            border-color: #444;
-            margin-bottom: 20px;
-        }
-
-        .filter-card .form-label {
-            color: #e0e0e0;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-row {
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: #2a2a2a;
-            border-left: 4px solid #0d6efd;
-            padding: 15px;
-            border-radius: 5px;
-        }
-
-        .stat-card h6 {
-            color: #a0a0a0;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .stat-card .stat-number {
-            color: #fff;
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-
-        .stat-card.action-type .stat-number {
-            color: #0dcaf0;
-        }
-
-        .stat-card.change-type .stat-number {
-            color: #0d6efd;
-        }
-
-        .stat-card.system-type .stat-number {
-            color: #6c757d;
-        }
-    </style>
 </head>
 <body>
-    <div class="wrapper d-flex">
+    <div class="wrapper">
         <?php include '_sidebar.php'; ?>
 
         <div class="main-content flex-grow-1">
             <div class="container-fluid p-4">
-                <!-- Header -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1 class="h3">Audit Log</h1>
-                    <div>
-                        <a href="logs.php" class="btn btn-sm btn-outline-secondary me-2">Admin Activity</a>
-                        <a href="updates.php" class="btn btn-sm btn-outline-secondary">Changes</a>
-                    </div>
+                <!-- Header with Tabs -->
+                <div class="mb-4">
+                    <h1 class="h3 mb-3">Logs & Audit</h1>
+                    <ul class="nav nav-tabs" role="tablist" style="border-bottom: 2px solid var(--border);">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link <?php echo $active_tab === 'audit' ? 'active' : ''; ?>" href="?tab=audit" style="<?php echo $active_tab === 'audit' ? 'border-bottom: 3px solid var(--blue); color: var(--text-primary);' : 'color: var(--text-secondary);'; ?>">
+                                <i class="bi bi-list"></i> Audit Log
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link <?php echo $active_tab === 'admin' ? 'active' : ''; ?>" href="?tab=admin" style="<?php echo $active_tab === 'admin' ? 'border-bottom: 3px solid var(--blue); color: var(--text-primary);' : 'color: var(--text-secondary);'; ?>">
+                                <i class="bi bi-clock-history"></i> Admin Activity
+                            </a>
+                        </li>
+                    </ul>
                 </div>
+
+                <!-- AUDIT LOG TAB -->
+                <?php if ($active_tab === 'audit'): ?>
 
                 <!-- Statistics -->
                 <?php if (!empty($stats)): ?>
@@ -230,7 +187,7 @@ if ($result) {
                         <form method="GET" class="row g-3">
                             <div class="col-md-2">
                                 <label for="type" class="form-label">Log Type</label>
-                                <select name="type" id="type" class="form-select form-select-sm bg-dark text-light border-dark">
+                                <select name="type" id="type" class="form-select form-select-sm">
                                     <option value="">All Types</option>
                                     <option value="ACTION" <?php echo $log_type === 'ACTION' ? 'selected' : ''; ?>>Admin Actions</option>
                                     <option value="CHANGE" <?php echo $log_type === 'CHANGE' ? 'selected' : ''; ?>>Data Changes</option>
@@ -240,7 +197,7 @@ if ($result) {
 
                             <div class="col-md-2">
                                 <label for="category" class="form-label">Category</label>
-                                <select name="category" id="category" class="form-select form-select-sm bg-dark text-light border-dark">
+                                <select name="category" id="category" class="form-select form-select-sm">
                                     <option value="">All Categories</option>
                                     <?php foreach ($categories as $cat): ?>
                                     <option value="<?php echo htmlspecialchars($cat['category']); ?>" <?php echo $category === $cat['category'] ? 'selected' : ''; ?>>
@@ -252,7 +209,7 @@ if ($result) {
 
                             <div class="col-md-2">
                                 <label for="admin" class="form-label">Admin</label>
-                                <select name="admin" id="admin" class="form-select form-select-sm bg-dark text-light border-dark">
+                                <select name="admin" id="admin" class="form-select form-select-sm">
                                     <option value="">All Admins</option>
                                     <?php foreach ($admins as $a): ?>
                                     <option value="<?php echo $a['id']; ?>" <?php echo $admin_id == $a['id'] ? 'selected' : ''; ?>>
@@ -264,13 +221,13 @@ if ($result) {
 
                             <div class="col-md-2">
                                 <label for="from" class="form-label">From Date</label>
-                                <input type="date" name="from" id="from" class="form-control form-control-sm bg-dark text-light border-dark"
+                                <input type="date" name="from" id="from" class="form-control form-control-sm"
                                        value="<?php echo htmlspecialchars($date_from ?? ''); ?>">
                             </div>
 
                             <div class="col-md-2">
                                 <label for="to" class="form-label">To Date</label>
-                                <input type="date" name="to" id="to" class="form-control form-control-sm bg-dark text-light border-dark"
+                                <input type="date" name="to" id="to" class="form-control form-control-sm"
                                        value="<?php echo htmlspecialchars($date_to ?? ''); ?>">
                             </div>
 
@@ -284,7 +241,7 @@ if ($result) {
                 </div>
 
                 <!-- Logs Table -->
-                <div class="card bg-dark border-secondary">
+                <div class="card">
                     <div class="card-body p-0">
                         <?php if (empty($logs)): ?>
                         <div class="alert alert-info m-3">
@@ -292,8 +249,8 @@ if ($result) {
                         </div>
                         <?php else: ?>
                         <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0">
-                                <thead class="table-secondary">
+                            <table class="table table-hover mb-0">
+                                <thead>
                                     <tr>
                                         <th style="width: 80px;">Type</th>
                                         <th style="width: 100px;">Category</th>
@@ -326,7 +283,7 @@ if ($result) {
                                             <small class="text-muted"><?php echo htmlspecialchars(substr($log['description'], 0, 80)); ?></small>
                                             <?php endif; ?>
                                             <?php if ($log['entity_name']): ?>
-                                            <div><small class="text-info">Entity: <?php echo htmlspecialchars($log['entity_name']); ?></small></div>
+                                            <div><small class="text-muted">Entity: <?php echo htmlspecialchars($log['entity_name']); ?></small></div>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -362,10 +319,10 @@ if ($result) {
                     <ul class="pagination justify-content-center">
                         <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=1<?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">First</a>
+                            <a class="page-link" href="?tab=audit&page=1<?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">First</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">Previous</a>
+                            <a class="page-link" href="?tab=audit&page=<?php echo $page - 1; ?><?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">Previous</a>
                         </li>
                         <?php endif; ?>
 
@@ -383,10 +340,10 @@ if ($result) {
 
                         <?php if ($page < $pages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">Next</a>
+                            <a class="page-link" href="?tab=audit&page=<?php echo $page + 1; ?><?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">Next</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $pages; ?><?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">Last</a>
+                            <a class="page-link" href="?tab=audit&page=<?php echo $pages; ?><?php echo $log_type ? "&type=$log_type" : ''; ?><?php echo $category ? "&category=$category" : ''; ?>">Last</a>
                         </li>
                         <?php endif; ?>
                     </ul>
@@ -396,6 +353,103 @@ if ($result) {
                 <div class="text-center text-muted mt-3">
                     <small>Showing <?php echo $offset + 1; ?> - <?php echo min($offset + $limit, $total); ?> of <?php echo number_format($total); ?> records</small>
                 </div>
+
+                <?php endif; /* End AUDIT LOG TAB */ ?>
+
+                <!-- ADMIN LOGS TAB -->
+                <?php if ($active_tab === 'admin'): ?>
+
+                <!-- Admin Logs Filters -->
+                <div class="card filter-card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Filters</h5>
+                        <form method="GET" class="row g-3">
+                            <input type="hidden" name="tab" value="admin">
+                            <div class="col-md-3">
+                                <label for="admin_filter" class="form-label">Admin</label>
+                                <select name="admin_filter" id="admin_filter" class="form-select form-select-sm">
+                                    <option value="">All Admins</option>
+                                    <?php foreach ($admin_admins as $a): ?>
+                                    <option value="<?php echo $a['id']; ?>" <?php echo $filter_admin == $a['id'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($a['username']); ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="action" class="form-label">Action</label>
+                                <select name="action" id="action" class="form-select form-select-sm">
+                                    <option value="">All Actions</option>
+                                    <?php foreach ($admin_actions as $act): ?>
+                                    <option value="<?php echo htmlspecialchars($act['action']); ?>" <?php echo $filter_action === $act['action'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($act['action']); ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" name="date" id="date" class="form-control form-control-sm" value="<?php echo htmlspecialchars($filter_date); ?>">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
+                                <a href="?tab=admin" class="btn btn-sm btn-outline-secondary w-100 mt-1">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Admin Logs Table -->
+                <div class="card mt-3">
+                    <div class="card-body p-0">
+                        <?php if (empty($admin_logs)): ?>
+                        <div class="alert alert-info m-3">
+                            No admin activity records found.
+                        </div>
+                        <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Admin</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                        <th>Date & Time</th>
+                                        <th>IP Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($admin_logs as $log): ?>
+                                    <tr>
+                                        <td>
+                                            <strong><?php echo htmlspecialchars($log['username'] ?? 'Unknown'); ?></strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary"><?php echo htmlspecialchars($log['action']); ?></span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted"><?php echo htmlspecialchars(substr($log['details'] ?? '', 0, 60)); ?></small>
+                                        </td>
+                                        <td class="timestamp-cell text-muted">
+                                            <?php echo date('M d, Y H:i:s', strtotime($log['created_at'])); ?>
+                                        </td>
+                                        <td class="ip-cell text-muted">
+                                            <?php echo htmlspecialchars($log['ip_address'] ?? 'N/A'); ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <?php endif; /* End ADMIN LOGS TAB */ ?>
             </div>
         </div>
     </div>

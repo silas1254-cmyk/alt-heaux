@@ -83,7 +83,8 @@ class ProductFileManager {
                     <div class="file-header">
                         <div class="file-info">
                             <div class="file-name">
-                                📄 ${this.escapeHtml(file.display_name)}
+                                <i class="bi bi-file-earmark"></i>
+                                ${this.escapeHtml(file.display_name)}
                                 ${file.version ? `<span class="version-badge">v${this.escapeHtml(file.version)}</span>` : ''}
                             </div>
                             <div class="file-meta">
@@ -95,11 +96,11 @@ class ProductFileManager {
                             </div>
                         </div>
                         <div class="file-actions">
-                            <button class="btn-icon edit-btn" title="Edit" onclick="fileManager.editFile(${file.id})">
-                                ✏️
+                            <button class="btn btn-sm btn-outline-primary" title="Edit" onclick="fileManager.editFile(${file.id})">
+                                <i class="bi bi-gear"></i>
                             </button>
-                            <button class="btn-icon delete-btn" title="Delete" onclick="fileManager.deleteFile(${file.id})">
-                                🗑️
+                            <button class="btn btn-sm btn-outline-danger" title="Delete" onclick="fileManager.deleteFile(${file.id})">
+                                <i class="bi bi-trash"></i>
                             </button>
                         </div>
                     </div>
@@ -109,7 +110,7 @@ class ProductFileManager {
                         </div>
                     ` : ''}
                     <div class="file-original-name">
-                        Original: ${this.escapeHtml(file.original_filename)}
+                        <strong>Original:</strong> ${this.escapeHtml(file.original_filename)}
                     </div>
                 </div>
             `;
