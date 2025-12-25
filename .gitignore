@@ -66,6 +66,11 @@ images/*
 # Database Migrations (these are tracked but backups aren't)
 *.sql.bak
 
+# Migration Runners (SENSITIVE - execute admin-only scripts, tracked in git but requires authentication)
+# These scripts require super_user authentication and are logged in audit trail
+# They are tracked in git but can only be executed by authenticated admins
+run_migration_*.php
+
 # IDE Workspace
 .vscode/settings.json
 .vscode/launch.json
