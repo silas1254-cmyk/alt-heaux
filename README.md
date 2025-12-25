@@ -106,14 +106,11 @@ alt-heaux/
 
 ## ⚙️ Configuration
 
-Edit `includes/config.php`:
-```php
-define('DB_HOST', 'localhost:3308');
-define('DB_USER', 'root');
-define('DB_PASSWORD', '');
-define('DB_NAME', 'alt_heaux');
-define('SITE_URL', 'http://localhost/alt-heaux/');
-```
+Database and configuration settings are stored securely in `includes/config.php` (excluded from Git).
+
+**Security Best Practice**: Never hardcode or document database credentials. Configuration files should only exist on the server, not in version control.
+
+For setup instructions, see `SECURITY_SETUP.md` and deployment guides.
 
 ## 📝 Database Setup
 

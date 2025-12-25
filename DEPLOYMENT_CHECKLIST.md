@@ -92,11 +92,14 @@ git push production main
 
 ### Import Database:
 ```
-mysql -h localhost:3306 -u altheaux_yevty -p'swegman123-' altheaux_website < backup.sql
+# Import the database backup
+mysql -h localhost:3306 -u [database_user] -p [database_name] < backup.sql
 ```
+Note: Replace [database_user] and [database_name] with your actual credentials (not shown in docs for security)
 
 ---
 
 **Status**: Ready for Production Deployment 🚀
 **Date**: December 24, 2025
-**Domain**: alt-heaux.com
+**Domain**: alt-heaux.site
+**Note**: This is a deployment reference only. Never commit actual credentials to Git.
