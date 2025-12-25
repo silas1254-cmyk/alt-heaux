@@ -13,11 +13,13 @@ Thumbs.db
 *.tmp
 desktop.ini
 
-# Environment & Configuration
+# Environment & Configuration (CRITICAL - contains passwords)
 .env
 .env.local
 .env.*.local
 config.local.php
+includes/config.php
+includes/config.production.php
 
 # Database
 database_backup.sql
