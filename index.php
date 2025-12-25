@@ -1,4 +1,5 @@
 <?php
+// TEST DEPLOYMENT: Updated Dec 25, 2025 - 12:00 AM
 require 'includes/config.php';
 require 'includes/compression.php';
 
